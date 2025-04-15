@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .mitigation-card {
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .mitigation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .mitigation-success {
+        border-left: 5px solid #198754;
+    }
+    .mitigation-failure {
+        border-left: 5px solid #dc3545;
+    }
+    .protection-level {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        margin-bottom: 8px;
+    }
+    .protection-level-fill {
+        height: 100%;
+        border-radius: 3px;
+        background-color: #0d6efd;
+    }
+    .progress-container {
+        height: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Vulnerability Mitigation</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Mitigation Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="mitigation-form">
+                    <div class="mb-3">
+                        <label class="form-label">Select Vulnerabilities to Mitigate</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="buffer-overflow" id="mit-buffer" checked>
+                            <label class="form-check-label" for="mit-buffer">
+                                Buffer Overflow
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="trapdoor" id="mit-trapdoor" checked>
+                            <label class="form-check-label" for="mit-trapdoor">
+                                Trapdoor
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cache-poisoning" id="mit-cache" checked>
+                            <label class="form-check-label" for="mit-cache">
+                                Cache Poisoning
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mitigation-mode" class="form-label">Mitigation Mode</label>
+                        <select class="form-select" id="mitigation-mode">
+                            <option value="suggest">Suggest Only (No Changes)</option>
+                            <option value="selective" selected>Selective (Apply Selected)</option>
+                            <option value="automatic">Automatic (Apply All)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backup-option" class="form-label">Backup Before Mitigation</label>
+                        <select class="form-select" id="backup-option">
+                            <option value="none">No Backup</option>
+                            <option value="config" selected>Configuration Backup</option>
+                            <option value="full">Full System Backup</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success" id="start-mitigation">Apply Mitigations</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Mitigation Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="status-display">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-secondary" id="status-badge">Idle</span>
+                    </div>
+                    <div class="progress progress-container mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center" id="status-message">No mitigation running</p>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success" id="refresh-mitigation" disabled>Refresh Results</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">System Protection Overview</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <strong>Buffer Overflow Protection</strong>
+                <div class="protection-level">
+                    <div class="protection-level-fill" id="buffer-level" style="width: 20%"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Vulnerable</small>
+                    <small class="text-muted">Protected</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <strong>Trapdoor Protection</strong>
+                <div class="protection-level">
+                    <div class="protection-level-fill" id="trapdoor-level" style="width: 30%"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Vulnerable</small>
+                    <small class="text-muted">Protected</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <strong>Cache Poisoning Protection</strong>
+                <div class="protection-level">
+                    <div class="protection-level-fill" id="cache-level" style="width: 15%"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Vulnerable</small>
+                    <small class="text-muted">Protected</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <strong>Overall System Protection</strong>
+                <div class="protection-level">
+                    <div class="protection-level-fill" id="overall-level" style="width: 20%"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Vulnerable</small>
+                    <small class="text-muted">Protected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Mitigation Results</h5>
+    </div>
+    <div class="card-body">
+        <div id="results-container">
+            {% if results %}
+                <div class="row">
+                    {% for result in results %}
+                        <div class="col-md-6">
+                            <div class="card mitigation-card {{ 'mitigation-success' if result.success else 'mitigation-failure' }}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ result.type }}</h6>
+                                    <span class="badge bg-{{ 'success' if result.success else 'danger' }}">
+                                        {{ 'Successful' if result.success else 'Failed' }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Action:</strong> {{ result.action_taken }}</p>
+                                    <p><strong>Mitigator:</strong> {{ result.mitigator }}</p>
+                                    <p><strong>Time:</strong> {{ result.timestamp }}</p>
+                                    <div class="accordion" id="mit-details-{{ loop.index }}">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                        data-bs-target="#mit-collapse-{{ loop.index }}">
+                                                        Technical Details
+                                                </button>
+                                            </h2>
+                                            <div id="mit-collapse-{{ loop.index }}" class="accordion-collapse collapse">
+                                                <div class="accordion-body">
+                                                    <pre class="small">{{ result.details|tojson(indent=2) }}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>Effectiveness:</span>
+                                        <span class="badge bg-primary">{{ result.details.effectiveness }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No mitigations applied yet. Configure and apply mitigations to see results.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mitigationForm = document.getElementById('mitigation-form');
+    const startMitigationBtn = document.getElementById('start-mitigation');
+    const refreshMitigationBtn = document.getElementById('refresh-mitigation');
+    const statusBadge = document.getElementById('status-badge');
+    const statusMessage = document.getElementById('status-message');
+    const progressBar = document.getElementById('progress-bar');
+    const resultsContainer = document.getElementById('results-container');
+    
+    // Protection level indicators
+    const bufferLevel = document.getElementById('buffer-level');
+    const trapdoorLevel = document.getElementById('trapdoor-level');
+    const cacheLevel = document.getElementById('cache-level');
+    const privilegeLevel = document.getElementById('privilege-level');
+    const raceLevel = document.getElementById('race-level');
+    const overallLevel = document.getElementById('overall-level');
+    
+    // Check URL parameters for pre-selected vulnerability type
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedType = urlParams.get('type');
+    if (selectedType) {
+        // Uncheck all
+        document.getElementById('mit-buffer').checked = false;
+        document.getElementById('mit-trapdoor').checked = false;
+        document.getElementById('mit-cache').checked = false;
+        document.getElementById('mit-privilege').checked = false;
+        document.getElementById('mit-race').checked = false;
+        
+        // Check the selected one
+        if (selectedType === 'Buffer Overflow') document.getElementById('mit-buffer').checked = true;
+        else if (selectedType === 'Trapdoor') document.getElementById('mit-trapdoor').checked = true;
+        else if (selectedType === 'Cache Poisoning') document.getElementById('mit-cache').checked = true;
+        else if (selectedType === 'Privilege Escalation') document.getElementById('mit-privilege').checked = true;
+        else if (selectedType === 'Race Condition') document.getElementById('mit-race').checked = true;
+    }
+    
+    mitigationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get selected vulnerability types
+        const vulnerabilityTypes = [];
+        if (document.getElementById('mit-buffer').checked) vulnerabilityTypes.push('buffer-overflow');
+        if (document.getElementById('mit-trapdoor').checked) vulnerabilityTypes.push('trapdoor');
+        if (document.getElementById('mit-cache').checked) vulnerabilityTypes.push('cache-poisoning');
+        if (document.getElementById('mit-privilege').checked) vulnerabilityTypes.push('privilege-escalation');
+        if (document.getElementById('mit-race').checked) vulnerabilityTypes.push('race-condition');
+        
+        // Get other form values
+        const mitigationMode = document.getElementById('mitigation-mode').value;
+        const backupOption = document.getElementById('backup-option').value;
+        
+        // Prepare options
+        const options = {
+            mode: mitigationMode,
+            backup: backupOption,
+            types: vulnerabilityTypes
+        };
+        
+        // Start mitigation
+        fetch('/api/start_mitigation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'vulnerabilities': JSON.stringify([]),
+                'options': JSON.stringify(options)
+            })
+        }).then(response => response.json())
+          .then(data => {
+              startMitigationBtn.disabled = true;
+              refreshMitigationBtn.disabled = false;
+              statusBadge.className = 'badge bg-warning';
+              statusBadge.textContent = 'Running';
+              
+              // Start polling for status
+              pollMitigationStatus();
+          });
+    });
+    
+    refreshMitigationBtn.addEventListener('click', function() {
+        // Refresh mitigation results
+        fetch('/api/results/mitigation')
+            .then(response => response.json())
+            .then(data => {
+                updateResultsDisplay(data);
+                updateProtectionLevels();
+            });
+    });
+    
+    function pollMitigationStatus() {
+        const statusInterval = setInterval(function() {
+            fetch('/api/status/mitigation')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status display
+                    statusMessage.textContent = data.message;
+                    progressBar.style.width = `${data.progress}%`;
+                    
+                    if (data.status === 'completed') {
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Completed';
+                        startMitigationBtn.disabled = false;
+                        clearInterval(statusInterval);
+                        
+                        // Fetch and display results
+                        fetch('/api/results/mitigation')
+                            .then(response => response.json())
+                            .then(results => {
+                                updateResultsDisplay(results);
+                                updateProtectionLevels();
+                            });
+                    } else if (data.status === 'failed') {
+                        statusBadge.className = 'badge bg-danger';
+                        statusBadge.textContent = 'Failed';
+                        startMitigationBtn.disabled = false;
+                        clearInterval(statusInterval);
+                    }
+                });
+        }, 1000);
+    }
+    
+    function updateResultsDisplay(results) {
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    No mitigations applied yet. Configure and apply mitigations to see results.
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="row">';
+        
+        results.forEach((result, index) => {
+            html += `
+            <div class="col-md-6">
+                <div class="card mitigation-card ${result.success ? 'mitigation-success' : 'mitigation-failure'}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">${result.type}</h6>
+                        <span class="badge bg-${result.success ? 'success' : 'danger'}">
+                            ${result.success ? 'Successful' : 'Failed'}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Action:</strong> ${result.action_taken}</p>
+                        <p><strong>Mitigator:</strong> ${result.mitigator}</p>
+                        <p><strong>Time:</strong> ${result.timestamp}</p>
+                        <div class="accordion" id="mit-details-${index}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#mit-collapse-${index}">
+                                            Technical Details
+                                    </button>
+                                </h2>
+                                <div id="mit-collapse-${index}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <pre class="small">${JSON.stringify(result.details, null, 2)}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Effectiveness:</span>
+                            <span class="badge bg-primary">${result.details.effectiveness}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsContainer.innerHTML = html;
+    }
+    
+    function updateProtectionLevels() {
+        fetch('/api/results/mitigation')
+            .then(response => response.json())
+            .then(results => {
+                let bufferProtection = 20;
+                let trapdoorProtection = 30;
+                let cacheProtection = 15;
+                
+                results.forEach(result => {
+                    if (!result.success) return;
+                    
+                    const effectiveness = parseInt(result.details.effectiveness.replace('%', ''));
+                    
+                    if (result.type === 'Buffer Overflow') {
+                        bufferProtection = Math.min(100, bufferProtection + effectiveness);
+                    } else if (result.type === 'Trapdoor') {
+                        trapdoorProtection = Math.min(100, trapdoorProtection + effectiveness);
+                    } else if (result.type === 'Cache Poisoning') {
+                        cacheProtection = Math.min(100, cacheProtection + effectiveness);
+                    }
+                });
+                
+                // Update UI
+                bufferLevel.style.width = `${bufferProtection}%`;
+                trapdoorLevel.style.width = `${trapdoorProtection}%`;
+                cacheLevel.style.width = `${cacheProtection}%`;
+                
+                // Calculate overall protection
+                const overall = Math.floor((bufferProtection + trapdoorProtection + cacheProtection) / 3);
+                overallLevel.style.width = `${overall}%`;
+                
+                // Update colors based on protection level
+                [
+                    {el: bufferLevel, value: bufferProtection},
+                    {el: trapdoorLevel, value: trapdoorProtection},
+                    {el: cacheLevel, value: cacheProtection},
+                    {el: overallLevel, value: overall}
+                ].forEach(item => {
+                    if (item.value < 30) {
+                        item.el.style.backgroundColor = '#dc3545'; // danger
+                    } else if (item.value < 70) {
+                        item.el.style.backgroundColor = '#ffc107'; // warning
+                    } else {
+                        item.el.style.backgroundColor = '#198754'; // success
+                    }
+                });
+            });
+    }
+    
+    // Initialize protection levels
+    updateProtectionLevels();
+});
+</script>
+{% endblock %}

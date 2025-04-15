@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .config-card {
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .config-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Framework Configuration</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Upload Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="config-upload-form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="config-file" class="form-label">Configuration File</label>
+                        <input class="form-control" type="file" id="config-file" name="config_file" accept=".yaml,.yml,.json">
+                        <div class="form-text">Upload a YAML or JSON configuration file</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Configuration</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Configuration Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" id="download-default-config">Download Default Config</button>
+                    <button class="btn btn-outline-primary" id="download-quick-scan-config">Quick Scan Template</button>
+                    <button class="btn btn-outline-primary" id="download-deep-scan-config">Deep Scan Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card config-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Detection Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="detection-config-form">
+                    <div class="mb-3">
+                        <label for="detection-threads" class="form-label">Max Threads</label>
+                        <input type="number" class="form-control" id="detection-threads" value="4" min="1" max="16">
+                    </div>
+                    <div class="mb-3">
+                        <label for="detection-timeout" class="form-label">Detection Timeout (seconds)</label>
+                        <input type="number" class="form-control" id="detection-timeout" value="300" min="30" max="3600">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Default Detection Types</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="buffer-overflow" id="config-buffer" checked>
+                            <label class="form-check-label" for="config-buffer">
+                                Buffer Overflows
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="trapdoor" id="config-trapdoor" checked>
+                            <label class="form-check-label" for="config-trapdoor">
+                                Trapdoors
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cache-poisoning" id="config-cache" checked>
+                            <label class="form-check-label" for="config-cache">
+                                Cache Poisoning
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="privilege-escalation" id="config-privilege" checked>
+                            <label class="form-check-label" for="config-privilege">
+                                Privilege Escalation
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="race-condition" id="config-race" checked>
+                            <label class="form-check-label" for="config-race">
+                                Race Conditions
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Detection Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card config-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Logging & Reporting</h5>
+            </div>
+            <div class="card-body">
+                <form id="logging-config-form">
+                    <div class="mb-3">
+                        <label for="log-level" class="form-label">Log Level</label>
+                        <select class="form-select" id="log-level">
+                            <option>DEBUG</option>
+                            <option selected>INFO</option>
+                            <option>WARNING</option>
+                            <option>ERROR</option>
+                            <option>CRITICAL</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="log-file" class="form-label">Log File Path</label>
+                        <input type="text" class="form-control" id="log-file" value="logs/security_framework.log">
+                    </div>
+                    <div class="mb-3">
+                        <label for="log-format" class="form-label">Log Format</label>
+                        <input type="text" class="form-control" id="log-format" value="%(asctime)s - %(name)s - %(levelname)s - %(message)s">
+                    </div>
+                    <div class="mb-3">
+                        <label for="report-format" class="form-label">Report Format</label>
+                        <select class="form-select" id="report-format">
+                            <option selected>JSON</option>
+                            <option>HTML</option>
+                            <option>PDF</option>
+                            <option>XML</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="report-path" class="form-label">Report Output Path</label>
+                        <input type="text" class="form-control" id="report-path" value="reports/">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="" id="report-auto-generate" checked>
+                        <label class="form-check-label" for="report-auto-generate">
+                            Auto-generate reports after detection
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Logging Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const configUploadForm = document.getElementById('config-upload-form');
+    const detectionConfigForm = document.getElementById('detection-config-form');
+    const loggingConfigForm = document.getElementById('logging-config-form');
+    
+    const downloadDefaultBtn = document.getElementById('download-default-config');
+    const downloadQuickBtn = document.getElementById('download-quick-scan-config');
+    const downloadDeepBtn = document.getElementById('download-deep-scan-config');
+    
+    configUploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        const configFile = document.getElementById('config-file').files[0];
+        
+        if (!configFile) {
+            alert('Please select a configuration file to upload');
+            return;
+        }
+        
+        formData.append('config_file', configFile);
+        
+        fetch('/api/upload_config', {
+            method: 'POST',
+            body: formData
+        }).then(response => response.json())
+          .then(data => {
+              if (data.status === 'success') {
+                  alert('Configuration uploaded successfully');
+              } else {
+                  alert('Error uploading configuration: ' + data.message);
+              }
+          });
+    });
+    
+    detectionConfigForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const config = {
+            threads: document.getElementById('detection-threads').value,
+            timeout: document.getElementById('detection-timeout').value,
+            types: []
+        };
+        
+        if (document.getElementById('config-buffer').checked) config.types.push('buffer-overflow');
+        if (document.getElementById('config-trapdoor').checked) config.types.push('trapdoor');
+        if (document.getElementById('config-cache').checked) config.types.push('cache-poisoning');
+        if (document.getElementById('config-privilege').checked) config.types.push('privilege-escalation');
+        if (document.getElementById('config-race').checked) config.types.push('race-condition');
+        
+        // In a real application, you would save this to the server
+        // For the demo, we'll just show an alert
+        console.log('Detection config:', config);
+        alert('Detection settings saved successfully');
+    });
+    
+    loggingConfigForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const config = {
+            log_level: document.getElementById('log-level').value,
+            log_file: document.getElementById('log-file').value,
+            log_format: document.getElementById('log-format').value,
+            report_format: document.getElementById('report-format').value,
+            report_path: document.getElementById('report-path').value,
+            auto_generate: document.getElementById('report-auto-generate').checked
+        };
+        
+        // In a real application, you would save this to the server
+        // For the demo, we'll just show an alert
+        console.log('Logging config:', config);
+        alert('Logging settings saved successfully');
+    });
+    
+    // Example template functions - would normally download a file
+    downloadDefaultBtn.addEventListener('click', function() {
+        const defaultConfig = {
+            detection: {
+                threads: 4,
+                timeout: 300,
+                types: ['buffer-overflow', 'trapdoor', 'cache-poisoning', 'privilege-escalation', 'race-condition']
+            },
+            simulation: {
+                intensity: 'medium',
+                safe_mode: true
+            },
+            mitigation: {
+                mode: 'selective',
+                backup: 'config'
+            },
+            logging: {
+                level: 'INFO',
+                file: 'logs/security_framework.log',
+                format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            },
+            reporting: {
+                format: 'JSON',
+                path: 'reports/',
+                auto_generate: true
+            }
+        };
+        
+        // In a real application, you would trigger a file download
+        // For the demo, we'll just show the config
+        console.log(defaultConfig);
+        alert('Default configuration template would be downloaded in a real application');
+    });
+    
+    downloadQuickBtn.addEventListener('click', function() {
+        alert('Quick scan configuration template would be downloaded in a real application');
+    });
+    
+    downloadDeepBtn.addEventListener('click', function() {
+        alert('Deep scan configuration template would be downloaded in a real application');
+    });
+});
+</script>
+{% endblock %}

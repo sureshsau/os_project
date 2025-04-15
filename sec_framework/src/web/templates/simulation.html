@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .simulation-card {
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .simulation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .simulation-success {
+        border-left: 5px solid #dc3545;
+    }
+    .simulation-failure {
+        border-left: 5px solid #198754;
+    }
+    .console-output {
+        background-color: #212529;
+        color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        height: 250px;
+        overflow-y: auto;
+    }
+    .progress-container {
+        height: 10px;
+    }
+    .blinking {
+        animation: blink 1s infinite;
+    }
+    @keyframes blink {
+        0% { opacity: 1.0; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1.0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Attack Simulation</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Simulation Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="simulation-form">
+                    <div class="mb-3">
+                        <label for="target-system" class="form-label">Target System</label>
+                        <input type="text" class="form-control" id="target-system" placeholder="localhost or IP address">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Select Attacks to Simulate</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="buffer-overflow" id="sim-buffer" checked>
+                            <label class="form-check-label" for="sim-buffer">
+                                Buffer Overflow
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="trapdoor" id="sim-trapdoor" checked>
+                            <label class="form-check-label" for="sim-trapdoor">
+                                Trapdoor
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cache-poisoning" id="sim-cache" checked>
+                            <label class="form-check-label" for="sim-cache">
+                                Cache Poisoning
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="simulation-intensity" class="form-label">Simulation Intensity</label>
+                        <select class="form-select" id="simulation-intensity">
+                            <option value="low">Low (Safe Mode)</option>
+                            <option value="medium" selected>Medium (Controlled)</option>
+                            <option value="high">High (Aggressive)</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="" id="confirm-safe-env">
+                        <label class="form-check-label" for="confirm-safe-env">
+                            I confirm this is being run in a safe, controlled environment
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-warning" id="start-simulation" disabled>Start Simulation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Simulation Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="status-display">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-secondary" id="status-badge">Idle</span>
+                    </div>
+                    <div class="progress progress-container mb-3">
+                        <div class="progress-bar bg-warning" role="progressbar" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center" id="status-message">No simulation running</p>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-warning" id="refresh-simulation" disabled>Refresh Results</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Console Output</h5>
+                <span class="badge bg-danger blinking" id="console-live-badge" style="display: none;">Live</span>
+            </div>
+            <div class="card-body">
+                <div class="console-output" id="console-output">
+                    > Simulation console ready...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Simulation Results</h5>
+    </div>
+    <div class="card-body">
+        <div id="results-container">
+            {% if results %}
+                <div class="row">
+                    {% for result in results %}
+                        <div class="col-md-6">
+                            <div class="card simulation-card {{ 'simulation-success' if result.success else 'simulation-failure' }}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ result.type }}</h6>
+                                    <span class="badge bg-{{ 'danger' if result.success else 'success' }}">
+                                        {{ 'Successful Attack' if result.success else 'Attack Failed' }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Result:</strong> {{ result.result }}</p>
+                                    <p><strong>Simulator:</strong> {{ result.simulator }}</p>
+                                    <p><strong>Time:</strong> {{ result.timestamp }}</p>
+                                    <div class="accordion" id="sim-details-{{ loop.index }}">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                        data-bs-target="#sim-collapse-{{ loop.index }}">
+                                                    Technical Details
+                                                </button>
+                                            </h2>
+                                            <div id="sim-collapse-{{ loop.index }}" class="accordion-collapse collapse">
+                                                <div class="accordion-body">
+                                                    <pre class="small">{{ result.details|tojson(indent=2) }}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-sm btn-success" onclick="mitigateVulnerability('{{ result.type }}')">Apply Mitigation</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No simulations run yet. Configure and start a simulation to see results.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const simulationForm = document.getElementById('simulation-form');
+    const startSimulationBtn = document.getElementById('start-simulation');
+    const refreshSimulationBtn = document.getElementById('refresh-simulation');
+    const statusBadge = document.getElementById('status-badge');
+    const statusMessage = document.getElementById('status-message');
+    const progressBar = document.getElementById('progress-bar');
+    const resultsContainer = document.getElementById('results-container');
+    const consoleOutput = document.getElementById('console-output');
+    const consoleLiveBadge = document.getElementById('console-live-badge');
+    const confirmSafeEnv = document.getElementById('confirm-safe-env');
+    
+    // Enable/disable start button based on safe environment confirmation
+    confirmSafeEnv.addEventListener('change', function() {
+        startSimulationBtn.disabled = !this.checked;
+    });
+    
+    // Check URL parameters for pre-selected vulnerability type
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedType = urlParams.get('type');
+    if (selectedType) {
+        // Uncheck all
+        document.getElementById('sim-buffer').checked = false;
+        document.getElementById('sim-trapdoor').checked = false;
+        document.getElementById('sim-cache').checked = false;
+        
+        // Check the selected one
+        if (selectedType === 'Buffer Overflow') document.getElementById('sim-buffer').checked = true;
+        else if (selectedType === 'Trapdoor') document.getElementById('sim-trapdoor').checked = true;
+        else if (selectedType === 'Cache Poisoning') document.getElementById('sim-cache').checked = true;
+    }
+    
+    simulationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const target = document.getElementById('target-system').value || 'localhost';
+        const intensity = document.getElementById('simulation-intensity').value;
+        
+        // Get selected attack types
+        const attackTypes = [];
+        if (document.getElementById('sim-buffer').checked) attackTypes.push('buffer-overflow');
+        if (document.getElementById('sim-trapdoor').checked) attackTypes.push('trapdoor');
+        if (document.getElementById('sim-cache').checked) attackTypes.push('cache-poisoning');
+        
+        // Prepare options
+        const options = {
+            intensity: intensity,
+            types: attackTypes
+        };
+        
+        // Start simulation
+        fetch('/api/start_simulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'target': target,
+                'options': JSON.stringify(options)
+            })
+        }).then(response => response.json())
+          .then(data => {
+              startSimulationBtn.disabled = true;
+              refreshSimulationBtn.disabled = false;
+              statusBadge.className = 'badge bg-warning';
+              statusBadge.textContent = 'Running';
+              
+              // Show live console badge
+              consoleLiveBadge.style.display = 'inline-block';
+              
+              // Start console simulation
+              simulateConsoleOutput(attackTypes);
+              
+              // Start polling for status
+              pollSimulationStatus();
+          });
+    });
+    
+    refreshSimulationBtn.addEventListener('click', function() {
+        // Refresh simulation results
+        fetch('/api/results/simulation')
+            .then(response => response.json())
+            .then(data => {
+                updateResultsDisplay(data);
+            });
+    });
+    
+    function pollSimulationStatus() {
+        const statusInterval = setInterval(function() {
+            fetch('/api/status/simulation')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status display
+                    statusMessage.textContent = data.message;
+                    progressBar.style.width = `${data.progress}%`;
+                    
+                    if (data.status === 'completed') {
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Completed';
+                        startSimulationBtn.disabled = !confirmSafeEnv.checked;
+                        consoleLiveBadge.style.display = 'none';
+                        clearInterval(statusInterval);
+                        
+                        // Add final console message
+                        addToConsole("> Simulation completed successfully.");
+                        
+                        // Fetch and display results
+                        fetch('/api/results/simulation')
+                            .then(response => response.json())
+                            .then(results => {
+                                updateResultsDisplay(results);
+                            });
+                    } else if (data.status === 'failed') {
+                        statusBadge.className = 'badge bg-danger';
+                        statusBadge.textContent = 'Failed';
+                        startSimulationBtn.disabled = !confirmSafeEnv.checked;
+                        consoleLiveBadge.style.display = 'none';
+                        clearInterval(statusInterval);
+                        
+                        // Add error message to console
+                        addToConsole("> ERROR: Simulation failed. See logs for details.");
+                    }
+                });
+        }, 1000);
+    }
+    
+    function simulateConsoleOutput(attackTypes) {
+        // Clear previous content
+        consoleOutput.innerHTML = '> Initializing simulation environment...\n';
+        
+        const messages = {
+            'buffer-overflow': [
+                "> Loading buffer overflow attack module...",
+                "> Analyzing memory allocation patterns...",
+                "> Identifying potential targets: process_handler, memory_manager",
+                "> Crafting overflow payload (4096 bytes)...",
+                "> Executing attack on target process...",
+                "> !! VULNERABLE: Successfully overflowed buffer and executed arbitrary code !!"
+            ],
+            'trapdoor': [
+                "> Loading trapdoor detection module...",
+                "> Scanning for hidden authentication mechanisms...",
+                "> Analyzing system binaries for backdoors...",
+                "> Testing for hardcoded credentials...",
+                "> Probing undocumented API endpoints...",
+                "> !! VULNERABLE: Found hardcoded master password in authentication module !!"
+            ],
+            'cache-poisoning': [
+                "> Loading cache poisoning module...",
+                "> Analyzing DNS cache integrity...",
+                "> Testing cache validation mechanisms...",
+                "> Injecting falsified DNS records...",
+                "> Monitoring cache updates...",
+                "> !! VULNERABLE: Successfully poisoned DNS cache with malicious records !!"
+            ]
+        };
+        
+        let messageIndex = 0;
+        let attackIndex = 0;
+        
+        const outputInterval = setInterval(() => {
+            if (attackIndex >= attackTypes.length) {
+                clearInterval(outputInterval);
+                return;
+            }
+            
+            const currentAttack = attackTypes[attackIndex];
+            const currentMessages = messages[currentAttack];
+            
+            if (messageIndex < currentMessages.length) {
+                addToConsole(currentMessages[messageIndex]);
+                messageIndex++;
+            } else {
+                messageIndex = 0;
+                attackIndex++;
+                if (attackIndex < attackTypes.length) {
+                    addToConsole("\n> ------------------------------\n");
+                }
+            }
+        }, 1000);
+    }
+    
+    function addToConsole(message) {
+        consoleOutput.innerHTML += message + '\n';
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    function updateResultsDisplay(results) {
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    No simulations run yet. Configure and start a simulation to see results.
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="row">';
+        
+        results.forEach((result, index) => {
+            html += `
+            <div class="col-md-6">
+                <div class="card simulation-card ${result.success ? 'simulation-success' : 'simulation-failure'}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">${result.type}</h6>
+                        <span class="badge bg-${result.success ? 'danger' : 'success'}">
+                            ${result.success ? 'Successful Attack' : 'Attack Failed'}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Result:</strong> ${result.result}</p>
+                        <p><strong>Simulator:</strong> ${result.simulator}</p>
+                        <p><strong>Time:</strong> ${result.timestamp}</p>
+                        <div class="accordion" id="sim-details-${index}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#sim-collapse-${index}">
+                                        Technical Details
+                                    </button>
+                                </h2>
+                                <div id="sim-collapse-${index}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <pre class="small">${JSON.stringify(result.details, null, 2)}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-success" onclick="mitigateVulnerability('${result.type}')">Apply Mitigation</button>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsContainer.innerHTML = html;
+    }
+});
+
+function mitigateVulnerability(vulnType) {
+    // Redirect to mitigation page with vulnerability type
+    window.location.href = `/mitigation?type=${encodeURIComponent(vulnType)}`;
+}
+</script>
+{% endblock %}

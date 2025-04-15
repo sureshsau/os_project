@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .vulnerability-card {
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .vulnerability-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .critical {
+        border-left: 5px solid #dc3545;
+    }
+    .high {
+        border-left: 5px solid #fd7e14;
+    }
+    .medium {
+        border-left: 5px solid #ffc107;
+    }
+    .low {
+        border-left: 5px solid #0dcaf0;
+    }
+    .progress-container {
+        height: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Vulnerability Detection</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Detection Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="detection-form">
+                    <div class="mb-3">
+                        <label for="target-system" class="form-label">Target System</label>
+                        <input type="text" class="form-control" id="target-system" placeholder="localhost or IP address">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vulnerability Types to Detect</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="buffer-overflow" id="check-buffer" checked>
+                            <label class="form-check-label" for="check-buffer">
+                                Buffer Overflows
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="trapdoor" id="check-trapdoor" checked>
+                            <label class="form-check-label" for="check-trapdoor">
+                                Trapdoors
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cache-poisoning" id="check-cache" checked>
+                            <label class="form-check-label" for="check-cache">
+                                Cache Poisoning
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="detection-depth" class="form-label">Detection Depth</label>
+                        <select class="form-select" id="detection-depth">
+                            <option value="quick">Quick Scan</option>
+                            <option value="standard" selected>Standard Scan</option>
+                            <option value="deep">Deep Scan</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="start-detection">Start Detection</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Detection Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="status-display">
+                    <div class="text-center mb-3">
+                        <span class="badge bg-secondary" id="status-badge">Idle</span>
+                    </div>
+                    <div class="progress progress-container mb-3">
+                        <div class="progress-bar" role="progressbar" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center" id="status-message">No detection running</p>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" id="refresh-detection" disabled>Refresh Results</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Detection Results</h5>
+    </div>
+    <div class="card-body">
+        <div id="results-container">
+            {% if results %}
+                <div class="row">
+                    {% for result in results %}
+                        <div class="col-md-6">
+                            <div class="card vulnerability-card {{ result.severity }}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ result.type }}</h6>
+                                    <span class="badge bg-{{ 'danger' if result.severity == 'critical' else 'warning' if result.severity == 'high' else 'info' if result.severity == 'medium' else 'secondary' }}">
+                                        {{ result.severity|upper }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Description:</strong> {{ result.description }}</p>
+                                    <p><strong>Detector:</strong> {{ result.detector }}</p>
+                                    <p><strong>Time:</strong> {{ result.timestamp }}</p>
+                                    <div class="accordion" id="details-{{ loop.index }}">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                        data-bs-target="#collapse-{{ loop.index }}">
+                                                    Technical Details
+                                                </button>
+                                            </h2>
+                                            <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse">
+                                                <div class="accordion-body">
+                                                    <pre class="small">{{ result.details|tojson(indent=2) }}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="btn btn-sm btn-info" onclick="simulateVulnerability('{{ result.type }}')">Simulate Attack</button>
+                                    <button class="btn btn-sm btn-success" onclick="mitigateVulnerability('{{ result.type }}')">Mitigate</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No vulnerabilities detected yet. Run a detection to see results.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const detectionForm = document.getElementById('detection-form');
+    const startDetectionBtn = document.getElementById('start-detection');
+    const refreshDetectionBtn = document.getElementById('refresh-detection');
+    const statusBadge = document.getElementById('status-badge');
+    const statusMessage = document.getElementById('status-message');
+    const progressBar = document.getElementById('progress-bar');
+    const resultsContainer = document.getElementById('results-container');
+    
+    detectionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const target = document.getElementById('target-system').value || 'localhost';
+        const detectionDepth = document.getElementById('detection-depth').value;
+        
+        // Get selected vulnerability types
+        const vulnerabilityTypes = [];
+        if (document.getElementById('check-buffer').checked) vulnerabilityTypes.push('buffer-overflow');
+        if (document.getElementById('check-trapdoor').checked) vulnerabilityTypes.push('trapdoor');
+        if (document.getElementById('check-cache').checked) vulnerabilityTypes.push('cache-poisoning');
+        
+        // Prepare options
+        const options = {
+            depth: detectionDepth,
+            types: vulnerabilityTypes
+        };
+        
+        // Start detection
+        fetch('/api/start_detection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'target': target,
+                'options': JSON.stringify(options)
+            })
+        }).then(response => response.json())
+          .then(data => {
+              startDetectionBtn.disabled = true;
+              refreshDetectionBtn.disabled = false;
+              statusBadge.className = 'badge bg-warning';
+              statusBadge.textContent = 'Running';
+              
+              // Start polling for status
+              pollDetectionStatus();
+          });
+    });
+    
+    refreshDetectionBtn.addEventListener('click', function() {
+        // Refresh detection results
+        fetch('/api/results/detection')
+            .then(response => response.json())
+            .then(data => {
+                updateResultsDisplay(data);
+            });
+    });
+    
+    function pollDetectionStatus() {
+        const statusInterval = setInterval(function() {
+            fetch('/api/status/detection')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status display
+                    statusMessage.textContent = data.message;
+                    progressBar.style.width = `${data.progress}%`;
+                    
+                    if (data.status === 'completed') {
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Completed';
+                        startDetectionBtn.disabled = false;
+                        clearInterval(statusInterval);
+                        
+                        // Fetch and display results
+                        fetch('/api/results/detection')
+                            .then(response => response.json())
+                            .then(results => {
+                                updateResultsDisplay(results);
+                            });
+                    } else if (data.status === 'failed') {
+                        statusBadge.className = 'badge bg-danger';
+                        statusBadge.textContent = 'Failed';
+                        startDetectionBtn.disabled = false;
+                        clearInterval(statusInterval);
+                    }
+                });
+        }, 1000);
+    }
+    
+    function updateResultsDisplay(results) {
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    No vulnerabilities detected.
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '<div class="row">';
+        
+        results.forEach((result, index) => {
+            const severityClass = result.severity === 'critical' ? 'danger' :
+                                  result.severity === 'high' ? 'warning' :
+                                  result.severity === 'medium' ? 'info' : 'secondary';
+            
+            html += `
+            <div class="col-md-6">
+                <div class="card vulnerability-card ${result.severity}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">${result.type}</h6>
+                        <span class="badge bg-${severityClass}">
+                            ${result.severity.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Description:</strong> ${result.description}</p>
+                        <p><strong>Detector:</strong> ${result.detector}</p>
+                        <p><strong>Time:</strong> ${result.timestamp}</p>
+                        <div class="accordion" id="details-${index}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapse-${index}">
+                                        Technical Details
+                                    </button>
+                                </h2>
+                                <div id="collapse-${index}" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <pre class="small">${JSON.stringify(result.details, null, 2)}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-info" onclick="simulateVulnerability('${result.type}')">Simulate Attack</button>
+                        <button class="btn btn-sm btn-success" onclick="mitigateVulnerability('${result.type}')">Mitigate</button>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsContainer.innerHTML = html;
+    }
+});
+
+function simulateVulnerability(vulnType) {
+    // Redirect to simulation page with vulnerability type
+    window.location.href = `/simulation?type=${encodeURIComponent(vulnType)}`;
+}
+
+function mitigateVulnerability(vulnType) {
+    // Redirect to mitigation page with vulnerability type
+    window.location.href = `/mitigation?type=${encodeURIComponent(vulnType)}`;
+}
+</script>
+{% endblock %}

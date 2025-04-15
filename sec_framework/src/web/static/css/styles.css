@@ -1,0 +1,119 @@
+/* Custom styles for the Security Vulnerability Detection Framework */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+.footer {
+    border-top: 1px solid rgba(0,0,0,0.1);
+    margin-top: 2rem;
+}
+
+/* Dashboard styles */
+.status-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Vulnerability severity indicators */
+.critical {
+    border-left: 5px solid #dc3545;
+}
+
+.high {
+    border-left: 5px solid #fd7e14;
+}
+
+.medium {
+    border-left: 5px solid #ffc107;
+}
+
+.low {
+    border-left: 5px solid #0dcaf0;
+}
+
+/* Console styling */
+.console-output {
+    background-color: #212529;
+    color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    height: 250px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+/* Animation for status indicators */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .alert-count {
+        font-size: 2rem !important;
+    }
+    
+    .console-output {
+        height: 200px;
+    }
+}
+
+/* Custom button styles */
+.btn-scan {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+}
+
+.btn-scan:hover {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+    color: white;
+}
+
+/* Progress bars */
+.progress-thin {
+    height: 8px;
+    border-radius: 4px;
+}
+
+/* Custom badge styles */
+.badge-vulnerability {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+}
