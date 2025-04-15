@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Security Framework</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <style>
+        /* Global Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #9b59b6;
+    --gray-color: #f4f6f9;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: var(--transition);
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 16px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+.btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn.primary {
+    background-color: var(--primary-color);
+}
+
+.btn.secondary {
+    background-color: var(--secondary-color);
+}
+
+.btn.danger {
+    background-color: var(--danger-color);
+}
+
+.section {
+    padding: 80px 0;
+    scroll-margin-top: 80px;
+}
+
+.section.gray {
+    background-color: var(--gray-color);
+}
+
+.section h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--dark-color);
+    font-size: 2.2rem;
+}
+
+.section-intro {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Header Styles */
+header {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.logo {
+    padding-left: 20px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.logo h1 i {
+    margin-right: 10px;
+}
+
+nav ul {
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: var(--dark-color);
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+nav ul li a:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+nav ul li a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Hero Section */
+.hero {
+    height: 500px;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Features Section */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    margin-bottom: 15px;
+    color: var(--dark-color);
+}
+
+/* Vulnerabilities Section */
+.vulnerability-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.vulnerability-card {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    padding: 25px;
+    position: relative;
+}
+
+.vulnerability-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.vulnerability-card h3 {
+    color: var(--dark-color);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.vulnerability-card p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.learn-more {
+    display: inline-block;
+    color: var(--primary-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.learn-more:hover {
+    text-decoration: underline;
+}
+
+/* Detection Interface */
+.detection-interface {
+    display: flex;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    min-height: 600px;
+}
+
+.interface-sidebar {
+    width: 250px;
+    background-color: var(--dark-color);
+    color: white;
+    padding: 20px;
+}
+
+.interface-sidebar h3 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.detection-methods li {
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.detection-methods li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.detection-methods li.active {
+    background-color: var(--primary-color);
+}
+
+.detection-controls {
+    margin-top: 30px;
+}
+
+.detection-controls button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.interface-main {
+    flex: 1;
+    padding: 20px;
+}
+
+.detection-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.status {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #eee;
+}
+
+#detection-status {
+    font-weight: 600;
+    color: #888;
+}
+
+.detection-console {
+    background-color: #2d2d2d;
+    color: #eee;
+    border-radius: 5px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    line-height: 1.3;
+}
+
+.log-entry:before {
+    content: '> ';
+    color: var(--primary-color);
+}
+
+.detection-results {
+    flex: 1;
+}
+
+.detection-results h4 {
+    margin-bottom: 15px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-table th, .results-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.results-table th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+}
+
+/* Mitigation Strategies */
+.mitigation-interface {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+}
+
+.mitigation-tabs {
+    display: flex;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+.tab {
+    padding: 15px 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.tab:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.tab.active {
+    background-color: white;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.mitigation-content {
+    padding: 30px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h3 {
+    margin-bottom: 25px;
+    color: var(--dark-color);
+}
+
+.mitigation-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.mitigation-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    transition: var(--transition);
+}
+
+.mitigation-card:hover {
+    box-shadow: var(--box-shadow);
+    border-color: transparent;
+}
+
+.mitigation-card h4 {
+    color: var(--dark-color);
+    margin-bottom: 10px;
+}
+
+.mitigation-card p {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.implement-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.implement-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Simulator Interface */
+.simulator-interface {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.simulator-controls {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.control-group select, .control-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.simulator-buttons {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+}
+
+.simulator-display {
+    padding: 20px;
+}
+
+.display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sim-status {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #eee;
+}
+
+#sim-status-value {
+    font-weight: 600;
+    color: #888;
+}
+
+.simulation-visualizer {
+    margin-bottom: 20px;
+}
+
+.sim-canvas-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+#sim-canvas {
+    background-color: white;
+    border: 1px solid #eee;
+}
+
+.simulation-logs {
+    margin-bottom: 20px;
+}
+
+.simulation-logs h4 {
+    margin-bottom: 10px;
+}
+
+.log-console {
+    background-color: #2d2d2d;
+    color: #eee;
+    border-radius: 5px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    height: 150px;
+    overflow-y: auto;
+}
+
+.sim-results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sim-results-table th, .sim-results-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.sim-results-table th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+}
+
+/* About Section */
+.about-content {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.about-text h3 {
+    color: var(--dark-color);
+    margin: 25px 0 15px;
+}
+
+.about-text p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.about-text ul {
+    padding-left: 20px;
+}
+
+.about-text ul li {
+    margin-bottom: 10px;
+    list-style-type: disc;
+}
+
+.about-image img {
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+}
+
+/* Footer Styles */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 60px 0 20px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-logo h2 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.footer-logo h2 i {
+    margin-right: 10px;
+}
+
+.footer-links h3, .footer-contact h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-links h3:after, .footer-contact h3:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.footer-links ul li {
+    margin-bottom: 12px;
+}
+
+.footer-links ul li a {
+    color: #ccc;
+    transition: var(--transition);
+}
+
+.footer-links ul li a:hover {
+    color: white;
+    padding-left: 5px;
+}
+
+.footer-contact p {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-contact p i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        height: auto;
+        padding: 15px 0;
+    }
+    
+    .logo {
+        margin-bottom: 15px;
+        padding-left: 0;
+    }
+    
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    nav ul li {
+        margin: 5px 10px;
+    }
+    
+    .hero {
+        height: 400px;
+    }
+    
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+    }
+    
+    .detection-interface {
+        flex-direction: column;
+    }
+    
+    .interface-sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .about-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .about-image {
+        order: -1;
+        margin-bottom: 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .footer-logo {
+        margin-bottom: 20px;
+    }
+    
+    .footer-links h3:after, .footer-contact h3:after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .footer-contact p {
+        justify-content: center;
+    }
+}
+
+    </style>
+    <header>
+        <div class="logo">
+            <h1><i class="fas fa-shield-alt"></i> SecureOS</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#vulnerabilities">Vulnerabilities</a></li>
+                <li><a href="#detection">Detection</a></li>
+                <li><a href="#mitigation">Mitigation</a></li>
+                <li><a href="#simulator">Simulator</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Operating System Security Framework</h1>
+            <p>A comprehensive solution to detect and mitigate security vulnerabilities in operating systems</p>
+            <div class="hero-buttons">
+                <a href="#vulnerabilities" class="btn primary">Learn About Vulnerabilities</a>
+                <a href="#simulator" class="btn secondary">Try Our Simulator</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="overview" class="section">
+        <div class="container">
+            <h2>Framework Overview</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-search"></i>
+                    <h3>Detection</h3>
+                    <p>Real-time monitoring and detection of security vulnerabilities in operating systems</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-virus"></i>
+                    <h3>Prevention</h3>
+                    <p>Proactive measures to prevent exploitation of known vulnerabilities</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>Mitigation</h3>
+                    <p>Strategies and tools to reduce the impact of security breaches</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>Simulation</h3>
+                    <p>Controlled environment to test and understand attack vectors</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="vulnerabilities" class="section gray">
+        <div class="container">
+            <h2>Common OS Vulnerabilities</h2>
+            <div class="vulnerability-grid">
+                <div class="vulnerability-card" id="buffer-overflow">
+                    <h3>Buffer Overflow</h3>
+                    <p>Occurs when a program writes more data to a block of memory than was allocated, often leading to code execution.</p>
+                    <a href="buffer-overflow.html" class="learn-more">Learn More</a>
+                </div>
+                <div class="vulnerability-card" id="trapdoors">
+                    <h3>Trapdoors</h3>
+                    <p>Secret entry points in software that bypass normal authentication, potentially allowing unauthorized access.</p>
+                    <a href="trapdoors.html" class="learn-more">Learn More</a>
+                </div>
+                <div class="vulnerability-card" id="cache-poisoning">
+                    <h3>Cache Poisoning</h3>
+                    <p>Corrupting data stored in a cache to cause system misbehavior or expose sensitive information.</p>
+                    <a href="cache-poisoning.html" class="learn-more">Learn More</a>
+                </div>
+                <div class="vulnerability-card" id="race-conditions">
+                    <h3>Race Conditions</h3>
+                    <p>Vulnerabilities that arise from improper timing or sequence of operations, leading to unpredictable behavior.</p>
+                    <a href="vulnerabilities/race-conditions.html" class="learn-more">Learn More</a>
+                </div>
+                <div class="vulnerability-card" id="privilege-escalation">
+                    <h3>Privilege Escalation</h3>
+                    <p>Exploiting flaws to gain elevated access to resources normally protected from an application or user.</p>
+                    <a href="vulnerabilities/privilege-escalation.html" class="learn-more">Learn More</a>
+                </div>
+                <div class="vulnerability-card" id="rootkits">
+                    <h3>Rootkits</h3>
+                    <p>Hidden software designed to gain unauthorized access while avoiding detection by system administrators.</p>
+                    <a href="vulnerabilities/rootkits.html" class="learn-more">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="detection" class="section">
+        <div class="container">
+            <h2>Detection Interface</h2>
+            <p class="section-intro">Our framework provides tools to detect various security vulnerabilities in real-time.</p>
+            
+            <div class="detection-interface">
+                <div class="interface-sidebar">
+                    <h3>Select Detection Method</h3>
+                    <ul class="detection-methods">
+                        <li data-method="signature" class="active">Signature-based</li>
+                        <li data-method="anomaly">Anomaly-based</li>
+                        <li data-method="behavior">Behavior Analysis</li>
+                        <li data-method="heuristic">Heuristic Analysis</li>
+                    </ul>
+                    
+                    <div class="detection-controls">
+                        <button id="start-detection" class="btn primary">Start Detection</button>
+                        <button id="stop-detection" class="btn secondary" disabled>Stop</button>
+                    </div>
+                </div>
+                
+                <div class="interface-main">
+                    <div class="detection-panel">
+                        <div class="panel-header">
+                            <h3>Detection Dashboard</h3>
+                            <div class="status">Status: <span id="detection-status">Idle</span></div>
+                        </div>
+                        
+                        <div class="detection-console">
+                            <div class="console-output" id="detection-output">
+                                <!-- Detection output will appear here -->
+                                <div class="log-entry">System initialized and ready for vulnerability scanning.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="detection-results">
+                            <h4>Detected Vulnerabilities</h4>
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Vulnerability Type</th>
+                                        <th>Severity</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detection-results-body">
+                                    <!-- Results will appear here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="mitigation" class="section gray">
+        <div class="container">
+            <h2>Mitigation Strategies</h2>
+            <p class="section-intro">Implement these strategies to protect your operating system against vulnerabilities.</p>
+            
+            <div class="mitigation-interface">
+                <div class="mitigation-tabs">
+                    <div class="tab active" data-tab="prevention">Prevention</div>
+                    <div class="tab" data-tab="response">Response</div>
+                    <div class="tab" data-tab="recovery">Recovery</div>
+                </div>
+                
+                <div class="mitigation-content">
+                    <div class="tab-content active" id="prevention-content">
+                        <h3>Prevention Measures</h3>
+                        <div class="mitigation-cards">
+                            <div class="mitigation-card">
+                                <h4>Input Validation</h4>
+                                <p>Implement strict input validation to prevent buffer overflow and injection attacks.</p>
+                                <button class="implement-btn" data-strategy="input-validation">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Least Privilege Principle</h4>
+                                <p>Run processes with the minimum necessary privileges to minimize damage from exploits.</p>
+                                <button class="implement-btn" data-strategy="least-privilege">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Address Space Layout Randomization</h4>
+                                <p>Randomize memory addresses to make buffer overflow attacks more difficult.</p>
+                                <button class="implement-btn" data-strategy="aslr">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Regular Updates</h4>
+                                <p>Keep the operating system and applications updated with the latest security patches.</p>
+                                <button class="implement-btn" data-strategy="updates">Implement</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="response-content">
+                        <h3>Response Strategies</h3>
+                        <div class="mitigation-cards">
+                            <div class="mitigation-card">
+                                <h4>Process Isolation</h4>
+                                <p>Contain potential compromises by isolating suspicious processes.</p>
+                                <button class="implement-btn" data-strategy="process-isolation">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Kill Suspicious Processes</h4>
+                                <p>Terminate processes exhibiting unusual behavior or unauthorized activities.</p>
+                                <button class="implement-btn" data-strategy="kill-process">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Network Segmentation</h4>
+                                <p>Prevent lateral movement by isolating affected network segments.</p>
+                                <button class="implement-btn" data-strategy="network-segmentation">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Real-time Alerts</h4>
+                                <p>Configure alerts for immediate notification of suspicious activities.</p>
+                                <button class="implement-btn" data-strategy="alerts">Implement</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="recovery-content">
+                        <h3>Recovery Procedures</h3>
+                        <div class="mitigation-cards">
+                            <div class="mitigation-card">
+                                <h4>System Restore</h4>
+                                <p>Restore the system to a known good state using snapshots or backups.</p>
+                                <button class="implement-btn" data-strategy="system-restore">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Forensic Analysis</h4>
+                                <p>Analyze the attack vector to prevent similar exploits in the future.</p>
+                                <button class="implement-btn" data-strategy="forensic">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Vulnerability Patching</h4>
+                                <p>Apply specific patches to address the exploited vulnerabilities.</p>
+                                <button class="implement-btn" data-strategy="patching">Implement</button>
+                            </div>
+                            <div class="mitigation-card">
+                                <h4>Security Audit</h4>
+                                <p>Conduct a comprehensive security audit to identify other potential weaknesses.</p>
+                                <button class="implement-btn" data-strategy="audit">Implement</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="simulator" class="section">
+        <div class="container">
+            <h2>Vulnerability Simulator</h2>
+            <p class="section-intro">Safely simulate attacks to understand vulnerabilities and test detection mechanisms.</p>
+            
+            <div class="simulator-interface">
+                <div class="simulator-controls">
+                    <div class="control-group">
+                        <label for="attack-type">Attack Type:</label>
+                        <select id="attack-type">
+                            <option value="buffer-overflow">Buffer Overflow</option>
+                            <option value="trapdoor">Trapdoor Insertion</option>
+                            <option value="cache-poisoning">Cache Poisoning</option>
+                            <option value="race-condition">Race Condition</option>
+                            <option value="privilege-escalation">Privilege Escalation</option>
+                            <option value="rootkit">Rootkit Installation</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="target-component">Target Component:</label>
+                        <select id="target-component">
+                            <option value="kernel">Kernel</option>
+                            <option value="user-space">User Space Application</option>
+                            <option value="filesystem">File System</option>
+                            <option value="network">Network Stack</option>
+                            <option value="memory">Memory Management</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="attack-intensity">Attack Intensity:</label>
+                        <input type="range" id="attack-intensity" min="1" max="10" value="5">
+                        <span id="intensity-value">5</span>
+                    </div>
+                    
+                    <div class="simulator-buttons">
+                        <button id="start-simulation" class="btn primary">Start Simulation</button>
+                        <button id="stop-simulation" class="btn secondary" disabled>Stop Simulation</button>
+                        <button id="reset-simulation" class="btn">Reset</button>
+                    </div>
+                </div>
+                
+                <div class="simulator-display">
+                    <div class="display-header">
+                        <h3>Simulation Dashboard</h3>
+                        <div class="sim-status">Status: <span id="sim-status-value">Ready</span></div>
+                    </div>
+                    
+                    <div class="simulation-visualizer">
+                        <div class="sim-canvas-container">
+                            <canvas id="sim-canvas" width="600" height="400">
+                                Your browser does not support HTML5 canvas
+                            </canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="simulation-logs">
+                        <h4>Simulation Logs</h4>
+                        <div class="log-console" id="sim-logs">
+                            <div class="log-entry">Simulator initialized. Select an attack type and target to begin.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="simulation-results">
+                        <h4>Attack Results</h4>
+                        <table class="sim-results-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sim-results-body">
+                                <tr>
+                                    <td>Detection Time</td>
+                                    <td>--</td>
+                                </tr>
+                                <tr>
+                                    <td>Success Rate</td>
+                                    <td>--</td>
+                                </tr>
+                                <tr>
+                                    <td>System Impact</td>
+                                    <td>--</td>
+                                </tr>
+                                <tr>
+                                    <td>Mitigation Effectiveness</td>
+                                    <td>--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section gray">
+        <div class="container">
+            <h2>About This Project</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>This operating system security framework was developed as a comprehensive solution for detecting and mitigating security vulnerabilities in modern operating systems. It provides educational resources, simulation capabilities, and practical tools for security professionals.</p>
+                    <p>The framework focuses on common OS vulnerabilities such as buffer overflows, trapdoors, cache poisoning, and more, with detailed explanations of how these vulnerabilities work and strategies to protect against them.</p>
+                    <h3>Project Goals</h3>
+                    <ul>
+                        <li>Educate users about operating system security vulnerabilities</li>
+                        <li>Provide tools for real-time detection of security threats</li>
+                        <li>Offer practical mitigation strategies for common vulnerabilities</li>
+                        <li>Enable safe simulation of attacks for educational purposes</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <img src="images/project-diagram.png" alt="Project Framework Diagram">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2><i class="fas fa-shield-alt"></i> SecureOS</h2>
+                    <p>Operating System Security Framework</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#vulnerabilities">Vulnerabilities</a></li>
+                        <li><a href="#detection">Detection</a></li>
+                        <li><a href="#mitigation">Mitigation</a></li>
+                        <li><a href="#simulator">Simulator</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> contact@secureos.example.com</p>
+                    <p><i class="fas fa-globe"></i> www.secureos-framework.example.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SecureOS Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Detection functionality for OS Security Framework
+
+// Global detection variables
+let detectionInterval;
+let detectionActive = false;
+let vulnerabilityDatabase = {
+    'buffer-overflow': {
+        patterns: [
+            'strcpy without bounds checking',
+            'memcpy with incorrect size',
+            'array access without bounds verification',
+            'stack smashing detected',
+            'heap overflow detected'
+        ],
+        mitigations: [
+            'Implement bounds checking',
+            'Use safer alternatives (strncpy, memcpy_s)',
+            'Enable ASLR and DEP/NX',
+            'Stack canaries',
+            'Input validation'
+        ]
+    },
+    'trapdoor': {
+        patterns: [
+            'unexpected privileged execution',
+            'unauthorized authentication bypass',
+            'hidden credentials detected',
+            'backdoor command sequence',
+            'covert authentication channel'
+        ],
+        mitigations: [
+            'Code review and auditing',
+            'Integrity verification',
+            'File and process monitoring',
+            'Privilege separation',
+            'Least privilege principle'
+        ]
+    },
+    'cache-poisoning': {
+        patterns: [
+            'cache entry mismatch detected',
+            'DNS cache inconsistency',
+            'ARP cache manipulation',
+            'unexpected cache invalidation',
+            'TLB entry corruption'
+        ],
+        mitigations: [
+            'Cache validation mechanisms',
+            'DNSSEC implementation',
+            'Static ARP entries for critical systems',
+            'Secure cache update protocols',
+            'Frequent cache flushing'
+        ]
+    },
+    'race-condition': {
+        patterns: [
+            'time-of-check to time-of-use discrepancy',
+            'file access race detected',
+            'competing thread operations',
+            'signal handler vulnerability',
+            'concurrent resource modification'
+        ],
+        mitigations: [
+            'Atomic operations',
+            'Proper locking mechanisms',
+            'File access through safe APIs',
+            'Transaction-based operations',
+            'Eliminating shared state when possible'
+        ]
+    },
+    'privilege-escalation': {
+        patterns: [
+            'unexpected UID/GID change',
+            'unauthorized capability acquisition',
+            'suspicious setuid execution',
+            'kernel module loading without authorization',
+            'permission modification anomaly'
+        ],
+        mitigations: [
+            'Restricted sudo policies',
+            'Capabilities instead of setuid',
+            'Seccomp-BPF filters',
+            'Mandatory Access Control',
+            'Regular privilege auditing'
+        ]
+    },
+    'rootkit': {
+        patterns: [
+            'syscall table modification detected',
+            'hidden process found',
+            'kernel module hiding behavior',
+            'file hiding activity',
+            'network connection hiding'
+        ],
+        mitigations: [
+            'Secure boot implementation',
+            'Kernel integrity monitoring',
+            'File system integrity verification',
+            'Behavioral analysis',
+            'Memory forensics'
+        ]
+    }
+};
+
+// Initialize detection module
+document.addEventListener('DOMContentLoaded', function() {
+    initDetectionSystem();
+});
+
+function initDetectionSystem() {
+    // Add event listeners for detection buttons
+    const startDetectionBtn = document.getElementById('start-detection');
+    const stopDetectionBtn = document.getElementById('stop-detection');
+    
+    if (startDetectionBtn && stopDetectionBtn) {
+        startDetectionBtn.addEventListener('click', startDetection);
+        stopDetectionBtn.addEventListener('click', stopDetection);
+    }
+}
+
+// Start detection process
+function startDetection() {
+    if (detectionActive) return;
+    detectionActive = true;
+    
+    const detectionOutput = document.getElementById('detection-output');
+    const detectionStatus = document.getElementById('detection-status');
+    const activeMethod = document.querySelector('.detection-methods li.active').getAttribute('data-method');
+    
+    // Update UI
+    detectionStatus.textContent = 'Active';
+    detectionStatus.style.color = '#2ecc71';
+    
+    // Log start
+    addDetectionLog('Starting vulnerability detection using ' + activeMethod + '-based method');
+    addDetectionLog('Initializing system scanners...');
+    
+    // Simulate loading
+    setTimeout(() => {
+        addDetectionLog('Loading vulnerability signatures and patterns...');
+    }, 1000);
+    
+    setTimeout(() => {
+        addDetectionLog('System scan initialized. Beginning vulnerability detection...');
+        beginDetectionSimulation(activeMethod);
+    }, 2000);
+}
+
+// Stop detection process
+function stopDetection() {
+    if (!detectionActive) return;
+    detectionActive = false;
+    
+    // Clear any scheduled detection events
+    clearTimeout(detectionTimeout);
+    clearInterval(detectionInterval);
+    
+    // Update UI
+    const detectionStatus = document.getElementById('detection-status');
+    detectionStatus.textContent = 'Stopped';
+    detectionStatus.style.color = '#e74c3c';
+    
+    // Log stop
+    addDetectionLog('Detection process stopped by user');
+    addDetectionLog('Shutting down system scanners...');
+    
+    setTimeout(() => {
+        addDetectionLog('Detection system inactive. Ready to begin new scan.');
+    }, 1000);
+}
+
+// Detection timeouts
+let detectionTimeout;
+
+// Begin detection simulation
+function beginDetectionSimulation(method) {
+    const detectionOutput = document.getElementById('detection-output');
+    const resultsBody = document.getElementById('detection-results-body');
+    
+    // Components to scan
+    const components = ['Kernel Memory', 'User Space Processes', 'File System', 'Network Stack', 'System Calls', 'Memory Management'];
+    
+    // Different behaviors based on detection method
+    switch (method) {
+        case 'signature':
+            // Signature-based detection - looks for known patterns
+            simulateSignatureDetection(components);
+            break;
+            
+        case 'anomaly':
+            // Anomaly-based detection - looks for unusual behavior
+            simulateAnomalyDetection(components);
+            break;
+            
+        case 'behavior':
+            // Behavior analysis - examines system behavior patterns
+            simulateBehaviorDetection(components);
+            break;
+            
+        case 'heuristic':
+            // Heuristic analysis - uses rules to identify suspicious activity
+            simulateHeuristicDetection(components);
+            break;
+    }
+}
+
+// Signature-based detection simulation
+function simulateSignatureDetection(components) {
+    let componentIndex = 0;
+    const vulnerabilityTypes = Object.keys(vulnerabilityDatabase);
+    
+    // Log scanning of each component
+    detectionInterval = setInterval(() => {
+        if (!detectionActive) return;
+        
+        if (componentIndex < components.length) {
+            const component = components[componentIndex];
+            addDetectionLog(`Scanning ${component} for known vulnerability signatures...`);
+            
+            // Random chance to find vulnerability
+            if (Math.random() < 0.3) {
+                // Random vulnerability type
+                const vulnType = vulnerabilityTypes[Math.floor(Math.random() * vulnerabilityTypes.length)];
+                const patterns = vulnerabilityDatabase[vulnType].patterns;
+                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                
+                // Random severity
+                const severities = ['Low', 'Medium', 'High', 'Critical'];
+                const severity = severities[Math.floor(Math.random() * severities.length)];
+                
+                // Delay finding slightly
+                setTimeout(() => {
+                    if (!detectionActive) return;
+                    
+                    // Log finding
+                    addDetectionLog(`ALERT: ${vulnType} vulnerability detected in ${component}`);
+                    addDetectionLog(`Signature matched: "${pattern}"`);
+                    
+                    // Add to results table
+                    addVulnerabilityToResults(vulnType, severity, component, pattern);
+                }, 1000);
+            }
+            
+            componentIndex++;
+        } else {
+            // Finished scanning all components, restart
+            componentIndex = 0;
+            
+            // Log scan complete
+            addDetectionLog('Completed full system scan. Beginning next scan cycle...');
+        }
+    }, 3000);
+}
+
+// Anomaly-based detection simulation
+function simulateAnomalyDetection(components) {
+    // Set baseline values
+    addDetectionLog('Establishing system behavior baseline...');
+    
+    setTimeout(() => {
+        addDetectionLog('Baseline established. Monitoring for deviations...');
+        
+        // Start monitoring for anomalies
+        let anomalyCheck = 1;
+        
+        detectionInterval = setInterval(() => {
+            if (!detectionActive) return;
+            
+            // Log periodic checks
+            addDetectionLog(`Anomaly check #${anomalyCheck} - Analyzing system metrics...`);
+            
+            // Random chance for anomaly
+            if (Math.random() < 0.25) {
+                // Generate anomaly details
+                const component = components[Math.floor(Math.random() * components.length)];
+                const anomalyTypes = [
+                    'Unusual memory access pattern',
+                    'Unexpected system call frequency',
+                    'Abnormal process behavior',
+                    'Statistical deviation in resource usage',
+                    'Irregular network packet patterns'
+                ];
+                const anomalyType = anomalyTypes[Math.floor(Math.random() * anomalyTypes.length)];
+                
+                // Map anomaly to potential vulnerability
+                const vulnType = mapAnomalyToVulnerability(anomalyType);
+                const severity = calculateAnomalySeverity(anomalyType);
+                
+                // Log finding
+                setTimeout(() => {
+                    if (!detectionActive) return;
+                    
+                    addDetectionLog(`ALERT: Anomaly detected in ${component}`);
+                    addDetectionLog(`Anomaly type: ${anomalyType}`);
+                    addDetectionLog(`Potential vulnerability: ${vulnType}`);
+                    
+                    // Add to results
+                    addVulnerabilityToResults(vulnType, severity, component, anomalyType);
+                }, 1000);
+            }
+            
+            anomalyCheck++;
+        }, 4000);
+    }, 2000);
+}
+
+// Behavior analysis detection simulation
+function simulateBehaviorDetection(components) {
+    addDetectionLog('Starting behavioral analysis engine...');
+    
+    setTimeout(() => {
+        addDetectionLog('Building process behavior models...');
+        
+        setTimeout(() => {
+            addDetectionLog('Behavior models ready. Monitoring system activity...');
+            
+            // Monitor behaviors
+            detectionInterval = setInterval(() => {
+                if (!detectionActive) return;
+                
+                // Select random component to analyze
+                const component = components[Math.floor(Math.random() * components.length)];
+                addDetectionLog(`Analyzing behavior patterns in ${component}...`);
+                
+                // Random chance to detect suspicious behavior
+                if (Math.random() < 0.3) {
+                    // Generate behavior details
+                    const behaviorTypes = [
+                        'Unexpected privileged operation sequence',
+                        'Unusual file access pattern',
+                        'Suspicious process communication',
+                        'Abnormal resource utilization trend',
+                        'Irregular control flow execution'
+                    ];
+                    const behaviorType = behaviorTypes[Math.floor(Math.random() * behaviorTypes.length)];
+                    
+                    // Map behavior to vulnerability
+                    const vulnType = mapBehaviorToVulnerability(behaviorType);
+                    const severity = calculateBehaviorSeverity(behaviorType);
+                    
+                    // Log finding
+                    setTimeout(() => {
+                        if (!detectionActive) return;
+                        
+                        addDetectionLog(`ALERT: Suspicious behavior detected in ${component}`);
+                        addDetectionLog(`Behavior: ${behaviorType}`);
+                        addDetectionLog(`Likely vulnerability: ${vulnType}`);
+                        
+                        // Add to results
+                        addVulnerabilityToResults(vulnType, severity, component, behaviorType);
+                    }, 1000);
+                }
+            }, 3500);
+        }, 1500);
+    }, 2000);
+}
+
+// Heuristic analysis detection simulation
+function simulateHeuristicDetection(components) {
+    addDetectionLog('Initializing heuristic rules engine...');
+    
+    setTimeout(() => {
+        addDetectionLog('Loading detection heuristics...');
+        
+        setTimeout(() => {
+            addDetectionLog('Heuristic analysis active. Evaluating system state...');
+            
+            // Evaluate using heuristics
+            detectionInterval = setInterval(() => {
+                if (!detectionActive) return;
+                
+                // Select random component
+                const component = components[Math.floor(Math.random() * components.length)];
+                addDetectionLog(`Applying heuristic rules to ${component}...`);
+                
+                // Random chance to find issue
+                if (Math.random() < 0.25) {
+                    // Generate heuristic match details
+                    const heuristicTypes = [
+                        'Potential zero-day vulnerability pattern',
+                        'Undocumented API usage',
+                        'Complex exploit chain indicator',
+                        'Memory corruption attempt signature',
+                        'Novel attack technique indicator'
+                    ];
+                    const heuristicType = heuristicTypes[Math.floor(Math.random() * heuristicTypes.length)];
+                    
+                    // Map to vulnerability type
+                    const vulnType = mapHeuristicToVulnerability(heuristicType);
+                    const severity = Math.random() < 0.4 ? 'Critical' : (Math.random() < 0.6 ? 'High' : 'Medium');
+                    
+                    // Log finding
+                    setTimeout(() => {
+                        if (!detectionActive) return;
+                        
+                        addDetectionLog(`ALERT: Heuristic detection in ${component}`);
+                        addDetectionLog(`Heuristic match: ${heuristicType}`);
+                        addDetectionLog(`Potential vulnerability: ${vulnType}`);
+                        
+                        // Add to results
+                        addVulnerabilityToResults(vulnType, severity, component, heuristicType);
+                    }, 1000);
+                }
+            }, 4000);
+        }, 2000);
+    }, 1500);
+}
+
+// Helper functions for detection simulation
+
+// Map anomaly to vulnerability type
+function mapAnomalyToVulnerability(anomalyType) {
+    if (anomalyType.includes('memory') || anomalyType.includes('resource')) {
+        return Math.random() < 0.7 ? 'buffer-overflow' : 'memory-corruption';
+    } else if (anomalyType.includes('system call')) {
+        return Math.random() < 0.6 ? 'privilege-escalation' : 'rootkit';
+    } else if (anomalyType.includes('network')) {
+        return Math.random() < 0.7 ? 'cache-poisoning' : 'session-hijacking';
+    } else if (anomalyType.includes('process')) {
+        return Math.random() < 0.5 ? 'race-condition' : 'trapdoor';
+    } else {
+        const vulnTypes = ['buffer-overflow', 'trapdoor', 'cache-poisoning', 'race-condition', 'privilege-escalation', 'rootkit'];
+        return vulnTypes[Math.floor(Math.random() * vulnTypes.length)];
+    }
+}
+
+// Map behavior to vulnerability type
+function mapBehaviorToVulnerability(behaviorType) {
+    if (behaviorType.includes('privileged')) {
+        return Math.random() < 0.7 ? 'privilege-escalation' : 'rootkit';
+    } else if (behaviorType.includes('file')) {
+        return Math.random() < 0.6 ? 'race-condition' : 'trapdoor';
+    } else if (behaviorType.includes('communication')) {
+        return Math.random() < 0.7 ? 'cache-poisoning' : 'side-channel';
+    } else if (behaviorType.includes('resource')) {
+        return Math.random() < 0.6 ? 'buffer-overflow' : 'memory-corruption';
+    } else if (behaviorType.includes('flow')) {
+        return Math.random() < 0.7 ? 'control-flow-hijacking' : 'code-injection';
+    } else {
+        const vulnTypes = ['buffer-overflow', 'trapdoor', 'cache-poisoning', 'race-condition', 'privilege-escalation', 'rootkit'];
+        return vulnTypes[Math.floor(Math.random() * vulnTypes.length)];
+    }
+}
+
+// Map heuristic to vulnerability type
+function mapHeuristicToVulnerability(heuristicType) {
+    if (heuristicType.includes('zero-day')) {
+        return Math.random() < 0.5 ? 'unknown-vulnerability' : 'novel-exploit';
+    } else if (heuristicType.includes('API')) {
+        return Math.random() < 0.6 ? 'trapdoor' : 'privilege-escalation';
+    } else if (heuristicType.includes('exploit chain')) {
+        return Math.random() < 0.7 ? 'privilege-escalation' : 'rootkit';
+    } else if (heuristicType.includes('memory')) {
+        return Math.random() < 0.6 ? 'buffer-overflow' : 'use-after-free';
+    } else if (heuristicType.includes('attack')) {
+        return Math.random() < 0.5 ? 'cache-poisoning' : 'race-condition';
+    } else {
+        const vulnTypes = ['buffer-overflow', 'trapdoor', 'cache-poisoning', 'race-condition', 'privilege-escalation', 'rootkit'];
+        return vulnTypes[Math.floor(Math.random() * vulnTypes.length)];
+    }
+}
+
+// Calculate anomaly severity
+function calculateAnomalySeverity(anomalyType) {
+    if (anomalyType.includes('memory')) {
+        return Math.random() < 0.6 ? 'Critical' : 'High';
+    } else if (anomalyType.includes('system call')) {
+        return Math.random() < 0.7 ? 'High' : 'Medium';
+    } else if (anomalyType.includes('process')) {
+        return Math.random() < 0.4 ? 'Critical' : (Math.random() < 0.7 ? 'High' : 'Medium');
+    } else if (anomalyType.includes('network')) {
+        return Math.random() < 0.5 ? 'High' : 'Medium';
+    } else {
+        const severities = ['Low', 'Medium', 'High', 'Critical'];
+        return severities[Math.floor(Math.random() * severities.length)];
+    }
+}
+
+// Calculate behavior severity
+function calculateBehaviorSeverity(behaviorType) {
+    if (behaviorType.includes('privileged')) {
+        return Math.random() < 0.7 ? 'Critical' : 'High';
+    } else if (behaviorType.includes('communication')) {
+        return Math.random() < 0.4 ? 'High' : 'Medium';
+    } else if (behaviorType.includes('file')) {
+        return Math.random() < 0.3 ? 'High' : (Math.random() < 0.7 ? 'Medium' : 'Low');
+    } else {
+        const severities = ['Low', 'Medium', 'High', 'Critical'];
+        return severities[Math.floor(Math.random() * severities.length)];
+    }
+}
+
+// Add vulnerability to results table
+function addVulnerabilityToResults(vulnType, severity, component, pattern) {
+    const resultsBody = document.getElementById('detection-results-body');
+    if (!resultsBody || !detectionActive) return;
+    
+    // Format vulnerability name
+    const vulnName = vulnType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    
+    // Generate timestamp
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString();
+    
+    // Create table row
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${timestamp}</td>
+        <td>${vulnName}</td>
+        <td><span class="severity ${severity.toLowerCase()}">${severity}</span></td>
+        <td>${component}</td>
+        <td>
+            <button class="btn-action mitigate">Mitigate</button>
+            <button class="btn-action ignore">Ignore</button>
+        </td>
+    `;
+    
+    // Prepend to results (newest at top)
+    resultsBody.prepend(tr);
+    
+    // Add event listeners to buttons
+    tr.querySelector('.btn-action.mitigate').addEventListener('click', function() {
+        // Get mitigation strategies
+        let mitigations = [];
+        if (vulnerabilityDatabase[vulnType]) {
+            mitigations = vulnerabilityDatabase[vulnType].mitigations;
+        } else {
+            // Generic mitigations
+            mitigations = [
+                'Update system to latest patches',
+                'Apply principle of least privilege',
+                'Implement additional monitoring',
+                'Review security configurations',
+                'Analyze affected component'
+            ];
+        }
+        
+        // Select a random mitigation
+        const mitigation = mitigations[Math.floor(Math.random() * mitigations.length)];
+        
+        // Update button and row
+        this.textContent = 'Mitigating...';
+        this.disabled = true;
+        tr.classList.add('mitigating');
+        
+        // Log mitigation
+        addDetectionLog(`Applying mitigation for ${vulnName} in ${component}:`);
+        addDetectionLog(`Strategy: ${mitigation}`);
+        
+        // Complete after delay
+        setTimeout(() => {
+            if (!detectionActive) return;
+            
+            tr.classList.remove('mitigating');
+            tr.classList.add('mitigated');
+            this.textContent = 'Mitigated';
+            
+            // Log completion
+            addDetectionLog(`Successfully mitigated ${vulnName} vulnerability in ${component}`);
+        }, 2000);
+    });
+    
+    tr.querySelector('.btn-action.ignore').addEventListener('click', function() {
+        tr.classList.add('ignored');
+        addDetectionLog(`Ignoring ${vulnName} vulnerability in ${component}`);
+    });
+    
+    // Show notification
+    showDetectionNotification(`Alert: ${severity} severity ${vulnName} detected`);
+}
+
+// Add log entry to detection console
+function addDetectionLog(message) {
+    const detectionOutput = document.getElementById('detection-output');
+    if (!detectionOutput) return;
+    
+    const logEntry = document.createElement('div');
+    logEntry.className = 'log-entry';
+    logEntry.textContent = message;
+    
+    detectionOutput.appendChild(logEntry);
+    detectionOutput.scrollTop = detectionOutput.scrollHeight;
+}
+
+// Show notification for detection
+function showDetectionNotification(message) {
+    // Check if notification element exists
+    let notification = document.querySelector('.detection-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'detection-notification';
+        document.body.appendChild(notification);
+    }
+    
+    // Set message and show
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    // Hide after delay
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+// Main JavaScript file for the OS Security Framework
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation active state
+    const sections = document.querySelectorAll('section');
+    const navItems = document.querySelectorAll('nav ul li a');
+    
+    // Smooth scrolling for navigation links
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            window.scrollTo({
+                top: targetSection.offsetTop - 70,
+                behavior: 'smooth'
+            });
+            
+            // Update active state
+            navItems.forEach(link => link.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Active navigation based on scroll position
+    window.addEventListener('scroll', function() {
+        let current = '';
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            const sectionHeight = section.clientHeight;
+            
+            if (pageYOffset >= sectionTop) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === `#${current}`) {
+                item.classList.add('active');
+            }
+        });
+    });
+    
+    // Mitigation Tabs
+    const mitigationTabs = document.querySelectorAll('.mitigation-tabs .tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    mitigationTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Remove active class from all tabs and contents
+            mitigationTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(`${tabId}-content`).classList.add('active');
+        });
+    });
+    
+    // Implementation buttons in mitigation section
+    const implementButtons = document.querySelectorAll('.implement-btn');
+    
+    implementButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const strategy = this.getAttribute('data-strategy');
+            const originalText = this.textContent;
+            
+            // Show implementing state
+            this.textContent = 'Implementing...';
+            this.disabled = true;
+            
+            // Simulate implementation
+            setTimeout(() => {
+                this.textContent = 'Implemented ✓';
+                this.classList.add('implemented');
+                
+                // Add a notification
+                showNotification(`Successfully implemented ${strategy.replace('-', ' ')} strategy.`);
+                
+                // Reset after some time
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.disabled = false;
+                    this.classList.remove('implemented');
+                }, 5000);
+            }, 2000);
+        });
+    });
+    
+    // Detection methods selection
+    const detectionMethods = document.querySelectorAll('.detection-methods li');
+    
+    detectionMethods.forEach(method => {
+        method.addEventListener('click', function() {
+            // Remove active class from all methods
+            detectionMethods.forEach(m => m.classList.remove('active'));
+            
+            // Add active class to clicked method
+            this.classList.add('active');
+        });
+    });
+    
+    // Detection control buttons
+    const startDetectionBtn = document.getElementById('start-detection');
+    const stopDetectionBtn = document.getElementById('stop-detection');
+    const detectionStatus = document.getElementById('detection-status');
+    const detectionOutput = document.getElementById('detection-output');
+    
+    startDetectionBtn.addEventListener('click', function() {
+        // Change button states
+        this.disabled = true;
+        stopDetectionBtn.disabled = false;
+        
+        // Update status
+        detectionStatus.textContent = 'Active';
+        detectionStatus.style.color = '#2ecc71';
+        
+        // Get active detection method
+        const activeMethod = document.querySelector('.detection-methods li.active').getAttribute('data-method');
+        
+        // Add log entry
+        addLogEntry(detectionOutput, `Starting detection using ${activeMethod}-based method...`);
+        
+        // Simulate detection process
+        simulateDetection(activeMethod);
+    });
+    
+    stopDetectionBtn.addEventListener('click', function() {
+        // Change button states
+        this.disabled = true;
+        startDetectionBtn.disabled = false;
+        
+        // Update status
+        detectionStatus.textContent = 'Stopped';
+        detectionStatus.style.color = '#e74c3c';
+        
+        // Add log entry
+        addLogEntry(detectionOutput, 'Detection process stopped by user.');
+        
+        // Clear any active detection simulations
+        clearTimeout(detectionSimulationTimer);
+    });
+    
+    // Simulator controls
+    const startSimulationBtn = document.getElementById('start-simulation');
+    const stopSimulationBtn = document.getElementById('stop-simulation');
+    const resetSimulationBtn = document.getElementById('reset-simulation');
+    const simStatusValue = document.getElementById('sim-status-value');
+    const simLogs = document.getElementById('sim-logs');
+    
+    // Intensity slider
+    const intensitySlider = document.getElementById('attack-intensity');
+    const intensityValue = document.getElementById('intensity-value');
+    
+    intensitySlider.addEventListener('input', function() {
+        intensityValue.textContent = this.value;
+    });
+    
+    startSimulationBtn.addEventListener('click', function() {
+        // Change button states
+        this.disabled = true;
+        stopSimulationBtn.disabled = false;
+        resetSimulationBtn.disabled = true;
+        
+        // Update status
+        simStatusValue.textContent = 'Running';
+        simStatusValue.style.color = '#2ecc71';
+        
+        // Get simulation parameters
+        const attackType = document.getElementById('attack-type').value;
+        const targetComponent = document.getElementById('target-component').value;
+        const intensity = document.getElementById('attack-intensity').value;
+        
+        // Add log entry
+        addLogEntry(simLogs, `Starting ${attackType} attack simulation on ${targetComponent} with intensity ${intensity}...`);
+        
+        // Start the simulation
+        startSimulation(attackType, targetComponent, intensity);
+    });
+    
+    stopSimulationBtn.addEventListener('click', function() {
+        // Change button states
+        this.disabled = true;
+        startSimulationBtn.disabled = false;
+        resetSimulationBtn.disabled = false;
+        
+        // Update status
+        simStatusValue.textContent = 'Stopped';
+        simStatusValue.style.color = '#e74c3c';
+        
+        // Add log entry
+        addLogEntry(simLogs, 'Simulation stopped by user.');
+        
+        // Stop the simulation
+        stopSimulation();
+    });
+    
+    resetSimulationBtn.addEventListener('click', function() {
+        // Reset all simulation parameters
+        document.getElementById('attack-type').selectedIndex = 0;
+        document.getElementById('target-component').selectedIndex = 0;
+        document.getElementById('attack-intensity').value = 5;
+        intensityValue.textContent = '5';
+        
+        // Reset results table
+        document.querySelectorAll('#sim-results-body tr td:nth-child(2)').forEach(cell => {
+            cell.textContent = '--';
+        });
+        
+        // Clear logs
+        simLogs.innerHTML = '<div class="log-entry">Simulator reset. Ready for new simulation.</div>';
+        
+        // Reset status
+        simStatusValue.textContent = 'Ready';
+        simStatusValue.style.color = '#888';
+        
+        // Reset simulation canvas
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawInitialCanvas();
+    });
+});
+
+// Helper functions
+let detectionSimulationTimer;
+
+function simulateDetection(method) {
+    const detectionOutput = document.getElementById('detection-output');
+    const resultsBody = document.getElementById('detection-results-body');
+    const methods = {
+        'signature': ['Buffer Overflow', 'Trapdoor Intrusion', 'Known Rootkit'],
+        'anomaly': ['Unusual System Call Pattern', 'Abnormal Resource Usage', 'Suspicious Network Activity'],
+        'behavior': ['Process Misbehavior', 'Unauthorized Access Attempt', 'Unexpected Memory Access'],
+        'heuristic': ['Potential Zero-day', 'New Attack Pattern', 'Unknown Binary Execution']
+    };
+    
+    const vulnerabilities = methods[method];
+    const severities = ['Low', 'Medium', 'High', 'Critical'];
+    const locations = [
+        'Kernel Memory Space', 
+        'User Application', 
+        'Network Stack', 
+        'File System', 
+        'Memory Management Unit'
+    ];
+    
+    // Simulate ongoing detection
+    let detectionCount = 0;
+    
+    function detectVulnerability() {
+        detectionCount++;
+        
+        // Randomly decide if we find a vulnerability (30% chance)
+        if (Math.random() < 0.3) {
+            // Random vulnerability from the method's list
+            const vulnerability = vulnerabilities[Math.floor(Math.random() * vulnerabilities.length)];
+            const severity = severities[Math.floor(Math.random() * severities.length)];
+            const location = locations[Math.floor(Math.random() * locations.length)];
+            
+            // Log the detection
+            addLogEntry(detectionOutput, `ALERT: Detected ${vulnerability} vulnerability in ${location}`);
+            
+            // Add to results table
+            const now = new Date();
+            const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${timestamp}</td>
+                <td>${vulnerability}</td>
+                <td><span class="severity ${severity.toLowerCase()}">${severity}</span></td>
+                <td>${location}</td>
+                <td>
+                    <button class="btn-action mitigate">Mitigate</button>
+                    <button class="btn-action ignore">Ignore</button>
+                </td>
+            `;
+            
+            resultsBody.prepend(tr);
+            
+            // Add event listeners to the new buttons
+            tr.querySelector('.btn-action.mitigate').addEventListener('click', function() {
+                tr.classList.add('mitigating');
+                this.textContent = 'Mitigating...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    tr.classList.remove('mitigating');
+                    tr.classList.add('mitigated');
+                    this.textContent = 'Mitigated';
+                    addLogEntry(detectionOutput, `Successfully mitigated ${vulnerability} vulnerability in ${location}`);
+                }, 2000);
+            });
+            
+            tr.querySelector('.btn-action.ignore').addEventListener('click', function() {
+                tr.classList.add('ignored');
+                addLogEntry(detectionOutput, `Ignored ${vulnerability} vulnerability in ${location}`);
+            });
+            
+            // Show notification
+            showNotification(`Alert: ${severity} severity ${vulnerability} detected`);
+        } else {
+            // Just log the ongoing scan
+            addLogEntry(detectionOutput, `Scanning ${locations[Math.floor(Math.random() * locations.length)]} for vulnerabilities...`);
+        }
+        
+        // Continue detection if not too many iterations
+        if (detectionCount < 20) {
+            detectionSimulationTimer = setTimeout(detectVulnerability, 3000 + Math.random() * 2000);
+        } else {
+            // Automatically stop after 20 iterations
+            document.getElementById('stop-detection').click();
+        }
+    }
+    
+    // Start the detection simulation
+    detectVulnerability();
+}
+
+function addLogEntry(container, message) {
+    const logEntry = document.createElement('div');
+    logEntry.className = 'log-entry';
+    logEntry.textContent = message;
+    
+    // Add to container and scroll to bottom
+    container.appendChild(logEntry);
+    container.scrollTop = container.scrollHeight;
+}
+
+function showNotification(message) {
+    // Create notification element if it doesn't exist
+    let notification = document.querySelector('.notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'notification';
+        document.body.appendChild(notification);
+    }
+    
+    // Set message and show
+    notification.textContent = message;
+    notification.classList.add('show');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// Initialize canvas
+function drawInitialCanvas() {
+    const canvas = document.getElementById('sim-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f9f9f9';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('Select attack parameters and click "Start Simulation"', canvas.width / 2, canvas.height / 2);
+    }
+}
+
+// Call initial canvas drawing
+drawInitialCanvas();
+
+// Simulator functionality for OS Security Framework
+
+// Global simulation variables
+let simulationRunning = false;
+let simulationCanvas, simulationCtx;
+let simulationObjects = [];
+let simulationAnimationFrame;
+let simulationStartTime;
+let attackType, targetComponent, attackIntensity;
+
+// Initialize the simulation
+function startSimulation(attack, target, intensity) {
+    // Set simulation parameters
+    attackType = attack;
+    targetComponent = target;
+    attackIntensity = parseInt(intensity);
+    simulationRunning = true;
+    simulationStartTime = Date.now();
+    
+    // Get canvas and context
+    simulationCanvas = document.getElementById('sim-canvas');
+    simulationCtx = simulationCanvas.getContext('2d');
+    
+    // Clear any existing simulation
+    simulationCtx.clearRect(0, 0, simulationCanvas.width, simulationCanvas.height);
+    
+    // Initialize simulation objects based on attack type
+    createSimulationObjects();
+    
+    // Start the animation loop
+    simulationLoop();
+    
+    // Schedule events during simulation
+    scheduleSimulationEvents();
+}
+
+// Stop the simulation
+function stopSimulation() {
+    simulationRunning = false;
+    
+    // Cancel animation frame
+    if (simulationAnimationFrame) {
+        cancelAnimationFrame(simulationAnimationFrame);
+    }
+    
+    // Clear any scheduled timeouts
+    clearAllSimulationTimeouts();
+    
+    // Calculate final results
+    calculateSimulationResults();
+}
+
+// Clear all timeouts
+let simulationTimeouts = [];
+function clearAllSimulationTimeouts() {
+    simulationTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    simulationTimeouts = [];
+}
+
+// Schedule simulation events
+function scheduleSimulationEvents() {
+    const simLogs = document.getElementById('sim-logs');
+    
+    // Add initial log entries
+    addLogEntry(simLogs, `Initializing ${attackType} attack on ${targetComponent}...`);
+    
+    // Schedule detection event (faster for higher intensity)
+    const detectionTime = Math.max(2000, 10000 - (attackIntensity * 500));
+    const timeoutId = setTimeout(() => {
+        addLogEntry(simLogs, `ALERT: ${attackType} attack detected!`);
+        
+        // Visual indication of detection
+        const detection = {
+            x: simulationCanvas.width / 2,
+            y: simulationCanvas.height / 2,
+            radius: 50,
+            color: 'rgba(231, 76, 60, 0.7)',
+            growing: true
+        };
+        
+        simulationObjects.push(detection);
+        
+        // Schedule mitigation attempt
+        const mitigationTimeoutId = setTimeout(() => {
+            const mitigationSuccess = Math.random() > (attackIntensity / 15); // Higher intensity = lower chance of success
+            
+            if (mitigationSuccess) {
+                addLogEntry(simLogs, `Mitigation successful: ${attackType} attack contained`);
+                
+                // Visual indication of successful mitigation
+                simulationObjects = simulationObjects.filter(obj => !obj.isAttack);
+                simulationObjects.push({
+                    x: simulationCanvas.width / 2,
+                    y: simulationCanvas.height / 2,
+                    radius: 100,
+                    color: 'rgba(46, 204, 113, 0.7)',
+                    growing: true,
+                    shrinking: false,
+                    isShield: true
+                });
+            } else {
+                addLogEntry(simLogs, `WARNING: Mitigation failed for ${attackType} attack`);
+                // Add more attack objects to show failure
+                for (let i = 0; i < 3; i++) {
+                    createAttackObject();
+                }
+            }
+        }, detectionTime + 3000);
+        
+        simulationTimeouts.push(mitigationTimeoutId);
+        
+    }, detectionTime);
+    
+    simulationTimeouts.push(timeoutId);
+    
+    // Schedule progress updates
+    for (let i = 1; i <= 3; i++) {
+        const progressTimeoutId = setTimeout(() => {
+            const progress = i * 25;
+            addLogEntry(simLogs, `Simulation ${progress}% complete...`);
+        }, i * 4000);
+        simulationTimeouts.push(progressTimeoutId);
+    }
+    
+    // Final completion timeout (if not stopped manually)
+    const completionTimeoutId = setTimeout(() => {
+        if (simulationRunning) {
+            document.getElementById('stop-simulation').click();
+        }
+    }, 15000);
+    
+    simulationTimeouts.push(completionTimeoutId);
+}
+
+// Create simulation objects based on attack type and target
+function createSimulationObjects() {
+    simulationObjects = [];
+    
+    // Create a visual representation of the OS component being attacked
+    const componentVisual = {
+        x: simulationCanvas.width / 2,
+        y: simulationCanvas.height / 2,
+        width: 200,
+        height: 150,
+        color: '#3498db',
+        label: getComponentLabel(),
+        isTarget: true
+    };
+    simulationObjects.push(componentVisual);
+    
+    // Create initial attack objects
+    for (let i = 0; i < attackIntensity / 2; i++) {
+        createAttackObject();
+    }
+}
+
+// Create a single attack object
+function createAttackObject() {
+    // Different visuals based on attack type
+    let attackObject;
+    
+    switch (attackType) {
+        case 'buffer-overflow':
+            // Buffer overflow represented as expanding blocks
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: Math.random() * simulationCanvas.height,
+                width: 10 + Math.random() * 20,
+                height: 10 + Math.random() * 20,
+                growRate: 0.2 + (attackIntensity / 20),
+                color: 'rgba(231, 76, 60, 0.8)',
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                isAttack: true,
+                type: 'overflow'
+            };
+            break;
+            
+        case 'trapdoor':
+            // Trapdoors represented as spinning triangles
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: Math.random() * simulationCanvas.height,
+                size: 15 + Math.random() * 10,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: 0.05 + (attackIntensity / 200),
+                color: 'rgba(241, 196, 15, 0.8)',
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                isAttack: true,
+                type: 'trapdoor'
+            };
+            break;
+            
+        case 'cache-poisoning':
+            // Cache poisoning as corrupting pixels
+            attackObject = {
+                x: simulationCanvas.width / 2 + (Math.random() - 0.5) * 150,
+                y: simulationCanvas.height / 2 + (Math.random() - 0.5) * 100,
+                radius: 5 + Math.random() * 5,
+                expandRate: 0.3 + (attackIntensity / 25),
+                color: 'rgba(142, 68, 173, 0.7)',
+                alpha: 0.7,
+                speedX: (Math.random() - 0.5),
+                speedY: (Math.random() - 0.5),
+                isAttack: true,
+                type: 'cache'
+            };
+            break;
+            
+        case 'race-condition':
+            // Race conditions as intersecting lines
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: Math.random() * simulationCanvas.height,
+                endX: simulationCanvas.width / 2,
+                endY: simulationCanvas.height / 2,
+                thickness: 2 + Math.random() * 3,
+                progress: 0,
+                growSpeed: 0.005 + (attackIntensity / 1000),
+                color: 'rgba(41, 128, 185, 0.7)',
+                isAttack: true,
+                type: 'race'
+            };
+            break;
+            
+        case 'privilege-escalation':
+            // Privilege escalation as rising elements
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: simulationCanvas.height + 20,
+                width: 15 + Math.random() * 10,
+                height: 15 + Math.random() * 10,
+                riseSpeed: 1 + attackIntensity / 5,
+                color: 'rgba(39, 174, 96, 0.8)',
+                isAttack: true,
+                type: 'privilege'
+            };
+            break;
+            
+        case 'rootkit':
+            // Rootkit as hidden elements that appear and disappear
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: Math.random() * simulationCanvas.height,
+                size: 20 + Math.random() * 15,
+                visible: true,
+                blinkRate: 50 + attackIntensity * 10,
+                lastBlink: 0,
+                color: 'rgba(44, 62, 80, 0.8)',
+                speedX: (Math.random() - 0.5) * 1.5,
+                speedY: (Math.random() - 0.5) * 1.5,
+                isAttack: true,
+                type: 'rootkit'
+            };
+            break;
+            
+        default:
+            // Generic attack visualization
+            attackObject = {
+                x: Math.random() * simulationCanvas.width,
+                y: Math.random() * simulationCanvas.height,
+                radius: 10 + Math.random() * 5,
+                color: 'rgba(231, 76, 60, 0.7)',
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                isAttack: true,
+                type: 'generic'
+            };
+    }
+    
+    simulationObjects.push(attackObject);
+}
+
+// Get component label based on target
+function getComponentLabel() {
+    switch (targetComponent) {
+        case 'kernel':
+            return 'OS Kernel';
+        case 'user-space':
+            return 'User Application';
+        case 'filesystem':
+            return 'File System';
+        case 'network':
+            return 'Network Stack';
+        case 'memory':
+            return 'Memory Management';
+        default:
+            return 'System Component';
+    }
+}
+
+// Main simulation loop
+function simulationLoop() {
+    if (!simulationRunning) return;
+    
+    // Clear canvas
+    simulationCtx.clearRect(0, 0, simulationCanvas.width, simulationCanvas.height);
+    
+    // Update and draw all objects
+    updateSimulation();
+    drawSimulation();
+    
+    // Schedule next frame
+    simulationAnimationFrame = requestAnimationFrame(simulationLoop);
+}
+
+// Update simulation state
+function updateSimulation() {
+    // Add new attack objects occasionally based on intensity
+    if (Math.random() < 0.01 * attackIntensity && simulationObjects.filter(obj => obj.isAttack).length < 20) {
+        createAttackObject();
+    }
+    
+    // Update each object
+    simulationObjects.forEach(obj => {
+        // Handle different object types
+        if (obj.type === 'overflow') {
+            // Buffer overflow grows
+            obj.width += obj.growRate;
+            obj.height += obj.growRate;
+            
+            // Move
+            obj.x += obj.speedX;
+            obj.y += obj.speedY;
+            
+            // Bounce off edges
+            if (obj.x < 0 || obj.x + obj.width > simulationCanvas.width) {
+                obj.speedX *= -1;
+            }
+            if (obj.y < 0 || obj.y + obj.height > simulationCanvas.height) {
+                obj.speedY *= -1;
+            }
+        }
+        else if (obj.type === 'trapdoor') {
+            // Trapdoor rotates
+            obj.rotation += obj.rotationSpeed;
+            
+            // Move
+            obj.x += obj.speedX;
+            obj.y += obj.speedY;
+            
+            // Bounce off edges
+            if (obj.x < 0 || obj.x > simulationCanvas.width) {
+                obj.speedX *= -1;
+            }
+            if (obj.y < 0 || obj.y > simulationCanvas.height) {
+                obj.speedY *= -1;
+            }
+        }
+        else if (obj.type === 'cache') {
+            // Cache poisoning expands
+            obj.radius += obj.expandRate;
+            
+            // Fade out as it expands
+            obj.alpha = Math.max(0, obj.alpha - 0.005);
+            
+            // Move slowly
+            obj.x += obj.speedX;
+            obj.y += obj.speedY;
+        }
+        else if (obj.type === 'race') {
+            // Race condition progresses
+            obj.progress = Math.min(1, obj.progress + obj.growSpeed);
+        }
+        else if (obj.type === 'privilege') {
+            // Privilege escalation rises
+            obj.y -= obj.riseSpeed;
+        }
+        else if (obj.type === 'rootkit') {
+            // Rootkit blinks
+            const now = Date.now();
+            if (now - obj.lastBlink > obj.blinkRate) {
+                obj.visible = !obj.visible;
+                obj.lastBlink = now;
+            }
+            
+            // Move
+            obj.x += obj.speedX;
+            obj.y += obj.speedY;
+            
+            // Bounce off edges
+            if (obj.x < 0 || obj.x > simulationCanvas.width) {
+                obj.speedX *= -1;
+            }
+            if (obj.y < 0 || obj.y > simulationCanvas.height) {
+                obj.speedY *= -1;
+            }
+        }
+        else if (obj.growing) {
+            // Growing effect (like detection)
+            obj.radius += 2;
+            
+            // Start shrinking when reaching maximum
+            if (obj.radius > 150) {
+                obj.growing = false;
+                obj.shrinking = true;
+            }
+        }
+        else if (obj.shrinking) {
+            // Shrinking effect
+            obj.radius -= 1;
+            
+            // Remove when too small
+            if (obj.radius < 5) {
+                const index = simulationObjects.indexOf(obj);
+                if (index > -1) {
+                    simulationObjects.splice(index, 1);
+                }
+            }
+        }
+    });
+    
+    // Remove expired objects
+    simulationObjects = simulationObjects.filter(obj => {
+        // Remove cache poisoning when faded out
+        if (obj.type === 'cache' && obj.alpha <= 0) return false;
+        
+        // Remove privilege escalation when off-screen
+        if (obj.type === 'privilege' && obj.y < -50) return false;
+        
+        // Keep everything else
+        return true;
+    });
+}
+
+// Draw the current simulation state
+function drawSimulation() {
+    // Draw target component first (in the background)
+    simulationObjects.forEach(obj => {
+        if (obj.isTarget) {
+            // Draw component shape
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.fillRect(obj.x - obj.width/2, obj.y - obj.height/2, obj.width, obj.height);
+            
+            // Add component label
+            simulationCtx.fillStyle = 'white';
+            simulationCtx.font = '14px Arial';
+            simulationCtx.textAlign = 'center';
+            simulationCtx.fillText(obj.label, obj.x, obj.y);
+        }
+    });
+    
+    // Draw all other objects
+    simulationObjects.forEach(obj => {
+        if (obj.isTarget) return; // Skip target component (already drawn)
+        
+        simulationCtx.save();
+        
+        // Different rendering for each type
+        if (obj.type === 'overflow') {
+            // Buffer overflow as expanding rectangles
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.fillRect(obj.x, obj.y, obj.width, obj.height);
+        }
+        else if (obj.type === 'trapdoor') {
+            // Trapdoor as spinning triangle
+            simulationCtx.translate(obj.x, obj.y);
+            simulationCtx.rotate(obj.rotation);
+            
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.beginPath();
+            simulationCtx.moveTo(0, -obj.size);
+            simulationCtx.lineTo(obj.size, obj.size);
+            simulationCtx.lineTo(-obj.size, obj.size);
+            simulationCtx.closePath();
+            simulationCtx.fill();
+        }
+        else if (obj.type === 'cache') {
+            // Cache poisoning as expanding circles
+            simulationCtx.fillStyle = obj.color.replace('0.7', obj.alpha);
+            simulationCtx.beginPath();
+            simulationCtx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            simulationCtx.fill();
+        }
+        else if (obj.type === 'race') {
+            // Race condition as growing line
+            simulationCtx.strokeStyle = obj.color;
+            simulationCtx.lineWidth = obj.thickness;
+            
+            simulationCtx.beginPath();
+            simulationCtx.moveTo(obj.x, obj.y);
+            const progressX = obj.x + (obj.endX - obj.x) * obj.progress;
+            const progressY = obj.y + (obj.endY - obj.y) * obj.progress;
+            simulationCtx.lineTo(progressX, progressY);
+            simulationCtx.stroke();
+        }
+        else if (obj.type === 'privilege') {
+            // Privilege escalation as rising boxes
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.fillRect(obj.x, obj.y, obj.width, obj.height);
+            
+            // Add arrow indicator
+            simulationCtx.fillStyle = 'white';
+            simulationCtx.beginPath();
+            simulationCtx.moveTo(obj.x + obj.width/2, obj.y);
+            simulationCtx.lineTo(obj.x + obj.width/2 - 5, obj.y + 5);
+            simulationCtx.lineTo(obj.x + obj.width/2 + 5, obj.y + 5);
+            simulationCtx.closePath();
+            simulationCtx.fill();
+        }
+        else if (obj.type === 'rootkit') {
+            // Rootkit as blinking shapes
+            if (obj.visible) {
+                simulationCtx.fillStyle = obj.color;
+                simulationCtx.beginPath();
+                simulationCtx.arc(obj.x, obj.y, obj.size/2, 0, Math.PI * 2);
+                simulationCtx.fill();
+                
+                // Add a "hidden" symbol
+                simulationCtx.strokeStyle = 'white';
+                simulationCtx.lineWidth = 2;
+                simulationCtx.beginPath();
+                simulationCtx.moveTo(obj.x - obj.size/3, obj.y);
+                simulationCtx.lineTo(obj.x + obj.size/3, obj.y);
+                simulationCtx.stroke();
+            }
+        }
+        else if (obj.isShield) {
+            // Shield effect
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.beginPath();
+            simulationCtx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            simulationCtx.fill();
+        }
+        else {
+            // Generic attack objects
+            simulationCtx.fillStyle = obj.color;
+            simulationCtx.beginPath();
+            simulationCtx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            simulationCtx.fill();
+        }
+        
+        simulationCtx.restore();
+    });
+}
+
+// Calculate and display the simulation results
+function calculateSimulationResults() {
+    const simulationTime = (Date.now() - simulationStartTime) / 1000;
+    const attackObjects = simulationObjects.filter(obj => obj.isAttack).length;
+    const hasShield = simulationObjects.some(obj => obj.isShield);
+    
+    // Calculate metrics
+    const detectionTime = Math.min(10, simulationTime / 2).toFixed(2);
+    const successRate = hasShield ? (100 - (attackIntensity * 5)).toFixed(1) + '%' : (attackIntensity * 5).toFixed(1) + '%';
+    const systemImpact = hasShield ? 'Low' : (attackIntensity > 7 ? 'Critical' : attackIntensity > 5 ? 'High' : attackIntensity > 3 ? 'Medium' : 'Low');
+    const mitigationEffectiveness = hasShield ? (100 - attackIntensity * 3).toFixed(1) + '%' : 'Failed';
+    
+    // Update results table
+    document.querySelector('#sim-results-body tr:nth-child(1) td:nth-child(2)').textContent = detectionTime + ' seconds';
+    document.querySelector('#sim-results-body tr:nth-child(2) td:nth-child(2)').textContent = successRate;
+    document.querySelector('#sim-results-body tr:nth-child(3) td:nth-child(2)').textContent = systemImpact;
+    document.querySelector('#sim-results-body tr:nth-child(4) td:nth-child(2)').textContent = mitigationEffectiveness;
+    
+    // Log completion
+    const simLogs = document.getElementById('sim-logs');
+    addLogEntry(simLogs, '--- Simulation Complete ---');
+    addLogEntry(simLogs, `Detection Time: ${detectionTime} seconds`);
+    addLogEntry(simLogs, `Attack Success Rate: ${successRate}`);
+    addLogEntry(simLogs, `System Impact: ${systemImpact}`);
+    addLogEntry(simLogs, `Mitigation Effectiveness: ${mitigationEffectiveness}`);
+}
+
+    </script>
+   
+</body>
+</html>
