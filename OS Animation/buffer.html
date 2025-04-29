@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buffer Overflow Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* Shared Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 3rem;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .textbox {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      margin-bottom: 30px;
+      max-width: 900px;
+      color: #ddd;
+      text-align: left;
+    }
+
+    .textbox h2 {
+      color: #00c6ff;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .textbox p, .textbox ul {
+      line-height: 1.7;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .textbox li {
+      margin-left: 20px;
+    }
+
+    .memory {
+      display: grid;
+      grid-template-columns: repeat(10, 70px);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .cell {
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      color: #fff;
+      transition: background 0.3s, transform 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .cell.safe {
+      background: #4caf50;
+    }
+
+    .cell.overflow {
+      background: #e53935;
+      animation: shake 0.5s infinite;
+    }
+
+    .cell.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .buffer-boundary {
+      border-right: 3px dashed #fff;
+    }
+
+    button {
+      padding: 14px 30px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin: 15px 0;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 198, 255, 0.3);
+    }
+
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      25% { transform: translate(-1px, -2px) rotate(-1deg); }
+      50% { transform: translate(-3px, 0px) rotate(1deg); }
+      75% { transform: translate(3px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -1px) rotate(-1deg); }
+    }
+
+    @media (max-width: 768px) {
+      .memory {
+        grid-template-columns: repeat(5, 60px);
+        gap: 10px;
+      }
+
+      .cell {
+        width: 60px;
+        height: 60px;
+        font-size: 0.9rem;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Buffer Overflow Simulation</h1>
+
+  <div class="textbox">
+    <h2>Understanding Buffer Overflow</h2>
+    <p>A buffer overflow occurs when a program writes more data to a buffer than it can hold. This extra data can overwrite adjacent memory and potentially cause unpredictable behavior.</p>
+    <ul>
+      <li><strong>Buffer:</strong> A designated area in memory.</li>
+      <li><strong>Overflow:</strong> Writing past the end of the buffer.</li>
+      <li><strong>Impact:</strong> Crashes, corrupted memory, or security breaches.</li>
+    </ul>
+    <p>Use the "Simulate Mitigation" button to start, and "Add Byte" to simulate writing to the buffer. Mitigation will stop you before overflow happens.</p>
+  </div>
+
+  <button onclick="startMitigationSimulation()">Simulate Mitigation</button>
+  <div class="memory" id="memory"></div>
+  <button onclick="fillMemoryWithBytes()" id="addButton" disabled>Add Byte</button>
+
+  <script>
+    const memory = document.getElementById('memory');
+    const addButton = document.getElementById('addButton');
+    const maxVisibleBytes = 8;
+    const totalBytes = 10;
+    let currentByte = 0;
+    let overflowed = false;
+    let mitigationActive = false;
+
+    for (let i = 0; i < totalBytes; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      if (i >= maxVisibleBytes) cell.classList.add('hidden');
+      memory.appendChild(cell);
+    }
+
+    function startMitigationSimulation() {
+      if (mitigationActive) return;
+      mitigationActive = true;
+      addButton.disabled = false;
+      const cells = document.querySelectorAll('.cell');
+      if (cells.length > maxVisibleBytes - 1) {
+        cells[maxVisibleBytes - 1].classList.add('buffer-boundary');
+      }
+    }
+
+    function fillMemoryWithBytes() {
+      if (overflowed) return;
+
+      const cells = document.querySelectorAll('.cell');
+      if (currentByte < cells.length) {
+        if (currentByte < maxVisibleBytes) {
+          cells[currentByte].classList.add('safe');
+          cells[currentByte].textContent = `Byte ${currentByte + 1}`;
+        } else {
+          cells[currentByte].classList.remove('hidden');
+          cells[currentByte].classList.add('overflow');
+          cells[currentByte].textContent = `Overflow!`;
+          overflowed = true;
+          addButton.disabled = true;
+        }
+
+        currentByte++;
+      }
+    }
+  </script>
+  <footer>
+    © 2025 | CyberSecure | Designed by You
+  </footer>
+</body>
+</html>

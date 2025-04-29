@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cache Poisoning Attack & Mitigation Simulation</title>
+<style>
+  /* Reset */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 3rem;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .section {
+    width: 90%;
+    max-width: 1100px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    margin: 20px 0;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    animation: fadeIn 0.8s ease forwards;
+    text-align: left;
+  }
+
+  .section h2 {
+    color: #00c6ff;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+  }
+
+  .log {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    margin: 10px 0;
+    border-left: 5px solid #00c6ff;
+    border-radius: 12px;
+    animation: fadeSlide 0.5s ease-out;
+    font-size: 1rem;
+  }
+
+  .log.attack {
+    border-left-color: #ff4d4d;
+    background: rgba(255,0,0,0.1);
+  }
+
+  .log.victim {
+    border-left-color: #ffa502;
+    background: rgba(255,165,0,0.1);
+  }
+
+  .log.fixed {
+    border-left-color: #2ed573;
+    background: rgba(46, 213, 115, 0.1);
+  }
+
+  table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  }
+
+  th, td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: left;
+  }
+
+  th {
+    background: rgba(255,255,255,0.08);
+    color: #00c6ff;
+    font-size: 1.1rem;
+  }
+
+  td.safe {
+    color: #70a1ff;
+  }
+
+  td.poisoned {
+    color: #ff6b81;
+    animation: blink 1s infinite alternate;
+    font-weight: bold;
+  }
+
+  td.fixed {
+    color: #2ed573;
+  }
+
+  .controls {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 198, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    transform: translateY(-4px);
+  }
+
+  @keyframes blink {
+    0% {opacity: 1;}
+    100% {opacity: 0.5;}
+  }
+
+  @keyframes fadeSlide {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  footer {
+    margin-top: 50px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .controls {
+      flex-direction: column;
+    }
+    h1 {
+      font-size: 2.5rem;
+    }
+  }
+</style>
+</head>
+
+<body>
+<h1>Cache Poisoning Simulation</h1>
+
+<div class="section">
+  <h2>1. Attack Phase</h2>
+  <div id="attackLogs"></div>
+</div>
+
+<div class="section">
+  <h2>2. Cache State</h2>
+  <table>
+    <thead>
+      <tr><th>URL</th><th>Response</th></tr>
+    </thead>
+    <tbody id="cacheTable"></tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>3. Victim Request</h2>
+  <div id="victimLogs"></div>
+</div>
+
+<div class="section">
+  <h2>4. Mitigation</h2>
+  <div id="fixLogs"></div>
+</div>
+
+<div class="controls">
+  <button onclick="startAttack()">Inject Malicious Request</button>
+  <button onclick="victimRequest()">Victim Requests Page</button>
+  <button onclick="mitigateAttack()">Mitigate Attack</button>
+</div>
+
+<footer>
+  © 2025 | CyberSecure | Designed by You
+</footer>
+
+<script>
+const cacheTable = document.getElementById('cacheTable');
+const attackLogs = document.getElementById('attackLogs');
+const victimLogs = document.getElementById('victimLogs');
+const fixLogs = document.getElementById('fixLogs');
+
+let cache = [
+  {url: '/home', response: 'Welcome Home', poisoned: false},
+  {url: '/profile', response: 'User Profile', poisoned: false},
+  {url: '/dashboard', response: 'Your Dashboard', poisoned: false},
+];
+
+function renderCache() {
+  cacheTable.innerHTML = '';
+  cache.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${entry.url}</td>
+    <td class="${entry.poisoned ? 'poisoned' : (entry.fixed ? 'fixed' : 'safe')}">${entry.response}</td>`;
+    cacheTable.appendChild(row);
+  });
+}
+
+function startAttack() {
+  const attackEntry = cache.find(c => c.url === '/profile');
+  if (attackEntry) {
+    attackEntry.response = 'Hacked: Malware Link!';
+    attackEntry.poisoned = true;
+  }
+  const log = document.createElement('div');
+  log.className = 'log attack';
+  log.textContent = '🔴 Attacker injected malicious response into /profile';
+  attackLogs.appendChild(log);
+  renderCache();
+}
+
+function victimRequest() {
+  const victimEntry = cache.find(c => c.url === '/profile');
+  const log = document.createElement('div');
+  log.className = 'log victim';
+  if (victimEntry.poisoned) {
+    log.textContent = '⚠️ Victim received POISONED /profile: "' + victimEntry.response + '"';
+  } else {
+    log.textContent = '✅ Victim received SAFE /profile: "' + victimEntry.response + '"';
+  }
+  victimLogs.appendChild(log);
+}
+
+function mitigateAttack() {
+  const fixEntry = cache.find(c => c.url === '/profile');
+  if (fixEntry) {
+    fixEntry.response = 'User Profile';
+    fixEntry.poisoned = false;
+    fixEntry.fixed = true;
+  }
+  const log = document.createElement('div');
+  log.className = 'log fixed';
+  log.textContent = '🛡️ Server sanitized cache for /profile and applied strict cache rules!';
+  fixLogs.appendChild(log);
+  renderCache();
+}
+
+renderCache();
+</script>
+</body>
+</html>

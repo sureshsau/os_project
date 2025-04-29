@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vulnerabilities and Mitigations</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: auto;
+      opacity: 0.8;
+    }
+
+    .definitions {
+      max-width: 900px;
+      margin-top: 30px;
+      margin-bottom: 50px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+
+    .definitions h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #00c6ff;
+    }
+
+    .definitions p {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .flex-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 10px;
+    }
+
+    .flex-box {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      width: 300px;
+      height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flex-box:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-5px); /* slight lift */
+      box-shadow: 0 8px 20px rgba(0, 198, 255, 0.3);
+    }
+
+    .flex-box h2, .flex-box p {
+      transition: color 0.3s ease;
+    }
+
+    .flex-box:hover h2 {
+      color: #00c6ff;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .flex-box {
+        width: 90%;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Vulnerabilities & Mitigations</h1>
+  <p>Explore common vulnerabilities and how to mitigate them effectively.</p>
+</header>
+
+<div class="definitions">
+  <h2>What is a Vulnerability?</h2>
+  <p>A vulnerability is a weakness or flaw in a system, software, or network that can be exploited by a threat actor to perform unauthorized actions. Vulnerabilities can arise from programming errors, system misconfigurations, or insecure design choices.</p>
+
+  <h2>What is Mitigation?</h2>
+  <p>Mitigation refers to the process of reducing the severity, seriousness, or impact of a vulnerability. It involves implementing measures like patches, secure coding practices, system hardening, and monitoring to prevent or minimize exploitation risks.</p>
+</div>
+
+<div class="flex-container">
+  <div class="flex-box" onclick="location.href='buffer.html'">
+    <h2>Buffer Overflow</h2>
+    <p>Prevent memory overwrite attacks with secure coding practices.</p>
+  </div>
+
+  <div class="flex-box" onclick="location.href='trapdoors.html'">
+    <h2>Trapdoors</h2>
+    <p>Identify and eliminate hidden backdoors in your system.</p>
+  </div>
+
+  <div class="flex-box" onclick="location.href='cachepoisioning.html'">
+    <h2>Cache Poisoning</h2>
+    <p>Safeguard caching mechanisms against data corruption threats.</p>
+  </div>
+</div>
+
+<footer>
+  © 2025 | CyberSecure | Designed by You
+</footer>
+
+</body>
+</html>
